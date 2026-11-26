@@ -1,4 +1,4 @@
-html, body, #root { height: 100%; font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif; font-size: 14px; line-height: 1.5; background: var(--bg-primary); color: var(--text); -webkit-font-smoothing: antialiased; }
+html, body, #root { height: 100%; font-family: var(--font-isi); font-size: 14px; line-height: 1.5; background: var(--bg-primary); color: var(--text); -webkit-font-smoothing: antialiased; }
 button, select, input, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; border: none; background: none; }
 .redup { color: var(--text-muted); } .kecil { font-size: 12px; } .tengah { text-align: center; padding: 60px 0; }
@@ -321,3 +321,55 @@ tr.baris-kelompok td { background: var(--hover-overlay); padding-top: 10px; }
 .chip.khusus { background: var(--hover-strong); color: var(--text-secondary); }
 .chip.khusus.ok { background: var(--green-subtle, color-mix(in srgb, var(--green) 16%, transparent)); color: var(--green); }
 .chip.khusus.bad { background: var(--red-subtle); color: var(--red); }
+
+
+/* ═══ Gaya Karsa Circle (tahap 3, 26 Nov 2026) ═══════════════════════════════════════════════════
+   Hitam + krem + lime + pink, garis hitam tegas, tombol kapsul, judul Unbounded, bintang kilau. */
+h1, h2, .kepala-halaman h1, .mulai-pahlawan h2, .kartu-berikut h2 { font-family: var(--font-judul); font-weight: 700; letter-spacing: -.02em; }
+.kepala-halaman h1 { font-size: 26px; }
+.kepala-halaman h1::after { content: ''; display: inline-block; width: .55em; height: .55em; margin-left: .35em; vertical-align: .15em; background: var(--pink-candy); clip-path: var(--kilau); }
+:root { --kilau: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%); }
+
+.btn { border-radius: var(--pill); border: 1.5px solid var(--line); padding: 8px 16px; }
+.btn.kecil { padding: 5px 12px; }
+.btn.utama { background: var(--accent); border-color: var(--line); color: var(--on-accent); box-shadow: none; }
+.btn.utama:hover { background: var(--accent-hover); }
+input, select, textarea { border-radius: var(--radius-sm); border: 1.5px solid var(--border-hover); }
+input:focus, select:focus, textarea:focus { border-color: var(--line); outline: 3px solid var(--accent-glow); }
+.panel, .stat, .modal, .kolom, .kartu-order { border: 1.5px solid var(--line); }
+.stat b { font-family: var(--font-judul); font-weight: 700; }
+.chip { background: var(--accent-subtle); color: var(--text); border: 1px solid var(--line); }
+.tab-mini { border-radius: var(--pill); border: 1.5px solid var(--line); background: var(--bg-card); }
+.tab-mini button { border-radius: var(--pill); }
+.tab-mini button.aktif { background: var(--accent); color: var(--on-accent); box-shadow: none; }
+.logo { font-family: var(--font-judul); font-weight: 700; }
+.logo span { border-radius: 50%; background: var(--accent); color: #111; font-family: var(--font-judul); }
+
+/* menu kiri selalu hitam, di mode terang maupun gelap */
+.sisi, .bar-ponsel {
+  --text: #f3f0e8; --text-secondary: #d3cebf; --text-muted: #8f8a7c;
+  --hover-overlay: rgba(255,255,255,0.07); --hover-strong: rgba(255,255,255,0.12);
+  --bg-input: #1c1c1c; --bg-card: #1c1c1c; --border: rgba(255,255,255,0.10); --border-hover: rgba(255,255,255,0.22); --line: rgba(255,255,255,0.35);
+  background: #111111; color: var(--text); border-color: #111111;
+}
+.menu button { border-radius: var(--pill); padding: 8px 12px; }
+.menu button.aktif { background: var(--accent); color: #111111; font-weight: 700; }
+.menu button.aktif::before { display: none; }
+.menu-judul { color: #8f8a7c; }
+.menu-angka { background: var(--pink-candy); color: #111; }
+.avatar { background: var(--pink-candy); color: #111; }
+
+/* halaman masuk */
+.login-bg { background: #111111; }
+.login-kartu { border: 1.5px solid var(--line); border-radius: 28px; max-width: 420px; gap: 2px; }
+.login-maskot { background: var(--pink-candy); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 14px; margin-bottom: 16px; display: grid; place-items: center;
+  background-image: linear-gradient(rgba(17,17,17,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(17,17,17,.08) 1px, transparent 1px); background-size: 22px 22px; }
+.login-maskot img { width: 100%; height: auto; display: block; }
+.login-kartu .logo { font-size: 22px; }
+
+/* sapaan Beranda dengan stiker karakter */
+.sapaan { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; background: var(--accent); color: #111; border: 1.5px solid var(--line); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 16px; }
+.sapaan h2 { margin: 0; font-size: 26px; }
+.sapaan .redup { color: #2f2f2f; }
+.stiker { flex: none; display: block; height: auto; }
+@media (max-width: 640px) { .sapaan { padding: 16px; } .sapaan h2 { font-size: 20px; } .sapaan .stiker { width: 96px; } }
