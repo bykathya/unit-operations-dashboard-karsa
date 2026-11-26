@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api } from './api'
 import { InputRupiah } from './Pilihan'
-import { cetakSlip } from './slipPdf'
+import { cetakSlip, cetakBanyak } from './slipPdf'
 
 // PENGGAJIAN (10 Nov 2026): koordinator memecah THP Bio menjadi RINCIAN TETAP sekali, lalu tiap bulan "Siapkan slip" (gaji pokok + komponen tetap + lembur presensi otomatis),
 // menambah bonus/komisi/potongan/baris tambahan, Final → Dibayar, dan mengunduh slip PDF. Angka bulan lalu tidak diketik ulang.
@@ -111,6 +111,39 @@ export default function Gaji({ studioId }) {
           {rinci === b.userId && <Rincian b={b} studioId={studioId} onTutup={() => setRinci(null)} onSimpan={muat} />}
           {b.slip && buka === b.userId && <Slip b={b} muat={muat} setGalat={setGalat} />}
         </div>))}
+      {d?.baris.some(b => b.slip) && <div className="toolbar" style={{ marginTop: 8 }}><button className="btn" onClick={() => { const ids = d.baris.filter(b => b.slip && b.slip.status !== 'DRAFT').map(b => b.slip.id); ids.length ? cetakBanyak(ids, `Slip gaji ${NAMA_BLN[bulan - 1]} ${tahun}`) : setGalat('Belum ada slip final bulan ini') }}>Unduh semua slip final</button></div>}
+      <Mentor studioId={studioId} bulan={`${tahun}-${String(bulan).padStart(2, '0')}`} />
+    </div>
+  )
+}
+
+// MENTOR (Karsa Circle, tahap 6): tanpa akun, cukup nama + honor bulanan; centang kalau honor bulan ini sudah dibayar.
+function Mentor({ studioId, bulan }) {
+  const [d, setD] = useState(null), [galat, setGalat] = useState(''), [f, setF] = useState({ nama: '', honor: '' }), [ubah, setUbah] = useState(null)
+  const muat = useCallback(() => api(`/api/circle/mentor?studioId=${studioId}&bulan=${bulan}`).then(x => { setD(x); setGalat('') }).catch(e => setGalat(e.message)), [studioId, bulan])
+  useEffect(() => { muat() }, [muat])
+  return (
+    <div className="panel" style={{ marginTop: 16 }}>
+      <h3 className="judul-bagian">Mentor</h3>
+      <p className="redup kecil" style={{ marginTop: 0 }}>Mentor tidak punya akun web. Cukup catat nama dan honor bulanannya; centang kalau honor bulan ini sudah dibayar (ikut dihitung di Arus Kas).</p>
+      {galat && <div className="galat blok">{galat}</div>}
+      {!d ? <div className="redup">Memuat…</div> : d.mentor.length === 0 ? <div className="kosong">Belum ada mentor.</div> : (
+        <table><thead><tr><th>Nama</th><th className="kanan">Honor / bulan</th><th>Bulan ini</th><th /></tr></thead><tbody>
+          {d.mentor.map(m => ubah?.id === m.id ? (
+            <tr key={m.id}><td><input value={ubah.nama} onChange={e => setUbah({ ...ubah, nama: e.target.value })} /></td><td><InputRupiah value={ubah.honor} onChange={v => setUbah({ ...ubah, honor: v })} /></td><td />
+              <td className="kanan"><button className="btn kecil utama" onClick={() => aksi(async () => { await api(`/api/circle/mentor/${m.id}`, { method: 'PATCH', body: { nama: ubah.nama, honor: ang(ubah.honor) } }); setUbah(null) }, setGalat, muat)}>Simpan</button> <button className="btn kecil" onClick={() => setUbah(null)}>Batal</button></td></tr>
+          ) : (
+            <tr key={m.id}><td><b>{m.nama}</b></td><td className="kanan">{rp(m.honor)}</td>
+              <td><label style={{ flexDirection: 'row', alignItems: 'center', gap: 6, margin: 0 }}><input type="checkbox" style={{ width: 'auto' }} checked={m.dibayar} onChange={e => aksi(() => api(`/api/circle/mentor/${m.id}/bayar`, { method: 'PUT', body: { bulan, dibayar: e.target.checked } }), setGalat, muat)} /> {m.dibayar ? `Sudah dibayar (${rp(m.jumlahDibayar)})` : 'Belum'}</label></td>
+              <td className="kanan"><button className="btn kecil" onClick={() => setUbah({ id: m.id, nama: m.nama, honor: String(m.honor) })}>Ubah</button> <button className="btn kecil" onClick={() => confirm(`Hapus mentor ${m.nama}?`) && aksi(() => api(`/api/circle/mentor/${m.id}`, { method: 'DELETE' }), setGalat, muat)}>Hapus</button></td></tr>
+          ))}
+        </tbody></table>
+      )}
+      <form className="toolbar" style={{ marginTop: 10 }} onSubmit={e => { e.preventDefault(); aksi(async () => { await api('/api/circle/mentor', { method: 'POST', body: { studioId, nama: f.nama, honor: ang(f.honor) } }); setF({ nama: '', honor: '' }) }, setGalat, muat) }}>
+        <input value={f.nama} onChange={e => setF({ ...f, nama: e.target.value })} placeholder="Nama mentor" maxLength={100} required aria-label="Nama mentor" />
+        <InputRupiah value={f.honor} onChange={v => setF({ ...f, honor: v })} placeholder="Honor per bulan" aria-label="Honor per bulan" />
+        <button className="btn utama">+ Tambah mentor</button>
+      </form>
     </div>
   )
 }

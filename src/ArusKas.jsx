@@ -12,7 +12,7 @@ import { useSegarkan } from './realtime'
 const rp = (n) => (n == null ? '—' : (n < 0 ? '−' : '') + 'Rp ' + Math.abs(Math.round(n)).toLocaleString('id-ID'))
 const usd = (n) => (n == null ? '—' : '$' + Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 }))
 const kunciBulan = (p) => `${p.tahun}-${String(p.bulan).padStart(2, '0')}`
-const RUTIN = (b) => b.sumber === 'BIO' || b.sumber === 'ITEM_TETAP'
+const RUTIN = (b) => b.sumber === 'BIO' || b.sumber === 'ITEM_TETAP' || b.sumber === 'MENTOR'
 const NAMA_PLATFORM = { paypal: 'PayPal', vgen: 'VGen', fiverr: 'Fiverr', etsy: 'Etsy', upwork: 'Upwork', komunitas: 'Komunitas / WhatsApp', lainnya: 'Lainnya' }
 const TAB = [['ringkas', 'Ringkasan'], ['keluar', 'Uang keluar'], ['masuk', 'Uang masuk'], ['simpanan', 'Simpanan'], ['jadwal', 'Jadwal']]
 
@@ -29,7 +29,7 @@ export default function ArusKas({ studioId }) {
   const muat = useCallback(async () => {
     try {
       const q = `studioId=${studioId}&bulan=${bulan}`
-      const [masuk, rinci, ringkas, platform, rek, jual, jadwal] = await Promise.all([
+      const [masuk, rinci, ringkas, platform, rek, jual, jadwal, mentor] = await Promise.all([
         api(`/api/circle/pemasukan?${q}`),
         api(`/api/circle/buku/rincian?${q}`),
         api(`/api/circle/buku/ringkasan?${q}`),
@@ -37,8 +37,9 @@ export default function ArusKas({ studioId }) {
         api(`/api/circle/buku/rekening?studioId=${studioId}`),
         api(`/api/circle/penjualan?studioId=${studioId}&tahun=${p.tahun}&bulan=${p.bulan}`).catch(() => null),
         api(`/api/circle/jadwal?${q}`),
+        api(`/api/circle/mentor?${q}`).catch(() => ({ mentor: [] })),
       ])
-      setD({ masuk, rinci, ringkas, platform, rek, jual, jadwal }); setGalat('')
+      setD({ masuk, rinci, ringkas, platform, rek, jual, jadwal, mentor }); setGalat('')
     } catch (e) { setGalat(e.message) }
   }, [studioId, bulan, p.tahun, p.bulan])
   useEffect(() => { setD(null); muat() }, [muat])
@@ -71,7 +72,9 @@ export default function ArusKas({ studioId }) {
 
 // ── angka bersama ──
 function hitung(d) {
-  const keluarBaris = d.rinci.baris.filter(b => b.arus === 'EXPENSE')
+  // Honor mentor (tahap 6): mentor tanpa akun, dicatat di Penggajian → ikut uang keluar sebagai baris rutin
+  const mentor = (d.mentor?.mentor ?? []).filter(m => m.honor > 0 || m.dibayar).map(m => ({ sumber: 'MENTOR', sumberId: m.id, kategori: 'Honor mentor', arus: 'EXPENSE', deskripsi: `Honor ${m.nama}`, jumlah: m.dibayar ? m.jumlahDibayar : m.honor, dibayar: m.dibayar }))
+  const keluarBaris = [...d.rinci.baris.filter(b => b.arus === 'EXPENSE'), ...mentor]
   const keluar = keluarBaris.reduce((s, b) => s + b.jumlah, 0)
   const belumBayar = keluarBaris.filter(b => RUTIN(b) && !b.dibayar)
   const pendapatan = d.masuk.baris.reduce((s, b) => s + (b.nilaiRp ?? 0), 0)
@@ -136,7 +139,9 @@ function UangKeluar({ d, studioId, bulan, p, jalankan }) {
   const ditutup = d.rinci.ditutup
   const grup = new Map(); for (const b of h.keluarBaris) { const g = grup.get(b.kategori) ?? []; g.push(b); grup.set(b.kategori, g) }
   const perluRek = d.rek.length > 0
-  const bayar = (b, ya) => jalankan(() => ya
+  const bayar = (b, ya) => jalankan(() => b.sumber === 'MENTOR'
+    ? api(`/api/circle/mentor/${b.sumberId}/bayar`, { method: 'PUT', body: { bulan, dibayar: ya } })
+    : ya
     ? api('/api/circle/buku/bayar-rutin', { method: 'POST', body: { studioId, bulan, tanggal: hariIniLokal(), rekeningId, baris: [{ sumber: b.sumber, sumberId: b.sumberId }] } })
     : api('/api/circle/buku/bayar-rutin/batal', { method: 'POST', body: { studioId, bulan, sumber: b.sumber, sumberId: b.sumberId } }))
   return (
@@ -173,8 +178,8 @@ function UangKeluar({ d, studioId, bulan, p, jalankan }) {
                   <tr key={(b.sumberId ?? b.id ?? '') + i}>
                     <td>{RUTIN(b) && !ditutup && (b.dibayar ? b.bisaBatal !== false : true)
                       ? <label style={{ flexDirection: 'row', alignItems: 'center', gap: 8, margin: 0, cursor: 'pointer' }}>
-                          <input type="checkbox" style={{ width: 'auto' }} checked={!!b.dibayar} disabled={!b.dibayar && perluRek && !rekeningId}
-                            title={!b.dibayar && perluRek && !rekeningId ? 'Pilih rekening dulu di atas' : ''}
+                          <input type="checkbox" style={{ width: 'auto' }} checked={!!b.dibayar} disabled={!b.dibayar && b.sumber !== 'MENTOR' && perluRek && !rekeningId}
+                            title={!b.dibayar && b.sumber !== 'MENTOR' && perluRek && !rekeningId ? 'Pilih rekening dulu di atas' : ''}
                             onChange={e => bayar(b, e.target.checked)} aria-label={`${b.deskripsi} sudah dibayar`} /> {b.deskripsi}</label>
                       : b.deskripsi}</td>
                     <td className="kanan">{rp(b.jumlah)}</td>
@@ -186,7 +191,7 @@ function UangKeluar({ d, studioId, bulan, p, jalankan }) {
           </tbody>
         </table>
       )}
-      <p className="redup kecil" style={{ marginTop: 8 }}>Gaji diambil dari Penggajian. Biaya rutin (langganan, sewa, dll.) diatur lewat tombol "Atur biaya rutin" dan otomatis muncul tiap bulan.</p>
+      <p className="redup kecil" style={{ marginTop: 8 }}>Gaji dan honor mentor diambil dari Penggajian. Biaya rutin (langganan, sewa, dll.) diatur lewat tombol "Atur biaya rutin" dan otomatis muncul tiap bulan.</p>
     </div>
   )
 }
