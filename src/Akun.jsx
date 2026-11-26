@@ -5,7 +5,7 @@ import { api } from './api'
 // (prospek & order) dan bisa ditugaskan ke marketer di tab Marketing. Data sama dengan modul Produksi Ekosistem.
 export default function Akun({ studioId }) {
   const [d, setD] = useState(null)
-  const [f, setF] = useState({ platform: 'Fiverr', namaAkun: '', feePersen: 20 })
+  const [f, setF] = useState({ platform: 'Fiverr', namaAkun: '', feePersen: 0 })
   const [edit, setEdit] = useState(null)
   const [galat, setGalat] = useState('')
   const muat = useCallback(() => api(`/api/circle/akun-jualan?studioId=${studioId}`).then(x => { setD(x); setGalat('') }).catch(e => setGalat(e.message)), [studioId])
@@ -27,21 +27,21 @@ export default function Akun({ studioId }) {
   return (
     <div>
       {/* 18 Nov 2026 (keputusan user): Admin Market boleh MENGUBAH akun yang ia pegang; menambah & menghapus akun tetap Koordinator */}
-      <p className="redup">{d.bisaTambah ? 'Tulis akun jualan studio ini persis seperti di platform (mis. nama toko Etsy, username Fiverr). Fee platform bawaan 20%; ubah hanya bila berbeda.' : d.bisaUbah ? 'Akun jualan yang kamu pegang. Kamu bisa mengubah nama & fee platform; menambah atau menghapus akun diatur Koordinator unit.' : 'Daftar akun jualan unit ini (lihat saja).'}</p>
+      <p className="redup">{d.bisaTambah ? 'Tulis akun jualan studio ini persis seperti di platform (mis. nama toko Etsy, username Fiverr). Potongan platform bawaan 0%; isi hanya bila platform itu memotong bayaran (mis. Fiverr 20%).' : d.bisaUbah ? 'Akun jualan yang kamu pegang. Kamu bisa mengubah nama & potongan platform; menambah atau menghapus akun diatur Koordinator unit.' : 'Daftar akun jualan unit ini (lihat saja).'}</p>
       {galat && <div className="galat blok">{galat}</div>}
       {d.bisaTambah && <div className="panel" style={{ marginBottom: 16 }}>
         <form onSubmit={tambah}>
           <div className="dua">
             <label>Platform<select value={f.platform} onChange={e => setF({ ...f, platform: e.target.value })}>{d.platform.map(p => <option key={p}>{p}</option>)}</select></label>
             <label>Nama akun<input value={f.namaAkun} onChange={e => setF({ ...f, namaAkun: e.target.value })} required maxLength={80} /></label>
-            <label>Fee platform (%)<input type="number" min="0" max="100" step="0.1" value={f.feePersen} onChange={e => setF({ ...f, feePersen: e.target.value })} /></label>
+            <label>Potongan platform (%)<input type="number" min="0" max="100" step="0.1" value={f.feePersen} onChange={e => setF({ ...f, feePersen: e.target.value })} /></label>
           </div>
           <button className="btn utama">+ Tambah akun</button>
         </form>
       </div>}
       {d.akun.length === 0 ? <div className="kosong">Belum ada akun jualan. Tambahkan di atas.</div> : (
         <table>
-          <thead><tr><th>Platform</th><th>Nama akun</th><th className="kanan">Fee</th><th /></tr></thead>
+          <thead><tr><th>Platform</th><th>Nama akun</th><th className="kanan">Potongan</th><th /></tr></thead>
           <tbody>{d.akun.map(a => edit?.id === a.id ? (
             <tr key={a.id}>
               <td><select value={edit.platform} onChange={e => setEdit({ ...edit, platform: e.target.value })}>{d.platform.map(p => <option key={p}>{p}</option>)}</select></td>
