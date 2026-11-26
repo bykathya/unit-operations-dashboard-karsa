@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useSegarkan } from './realtime'
 import { api } from './api'
+import Stiker from './Stiker'
 
 // BERANDA per peran (adaptasi OGS HomeComposer): sapaan, "perlu perhatian", task saya, pengingat delivery H-1…5, ringkasan manajer/marketer, seri 8 minggu.
 // Tanpa angka uang.
@@ -23,8 +24,10 @@ export default function Beranda({ studioId, pindah, onOrder }) {
   }
   return (
     <div>
-      <h2 style={{ margin: '0 0 2px' }}>{d.sapaan}, {d.nama.split(' ')[0]}</h2>
-      <div className="redup" style={{ marginBottom: 14 }}>{tgl}</div>
+      <div className="sapaan">
+        <div><h2>{d.sapaan}, {d.nama.split(' ')[0]}</h2><div className="redup">{tgl}</div></div>
+        <Stiker nama={d.nama} ukuran={140} />
+      </div>
       {d.perhatian.length > 0 ? (
         <div className="panel"><h3 className="judul-bagian">Perlu perhatian</h3>
           {d.perhatian.map(p => <div key={p.kunci} className="meta" style={{ marginBottom: 6 }}><span className="lencana revisi">{p.jumlah}</span><span>{p.label}</span><button className="btn kecil" onClick={() => { if (p.kunci === 'lembur') { try { localStorage.setItem(`tugas-sub-${studioId}`, 'lembur') } catch { /* abaikan */ } } pindah(p.tab) }}>Buka</button></div>)}

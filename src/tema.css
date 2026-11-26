@@ -1,100 +1,108 @@
-/* Token tema disalin dari Ekosistem (client/src/styles/index.css) — gaya clean toska, terang/gelap. */
+/* Token tema Karsa Circle (tahap 3, 26 Nov 2026): hitam, krem, lime neon, pink permen.
+   Huruf judul Unbounded, huruf isi Space Grotesk. Menu kiri selalu hitam (lihat app.css .sisi).
+   Mode TERANG (krem) jadi bawaan; mode gelap tetap ada. SEMUA warna komponen wajib lewat variabel di sini.
+   Lime terlalu terang untuk teks di atas krem → teks beraksen pakai --accent-light (hijau zaitun tua),
+   dan teks di atas latar lime pakai --on-accent (hitam). */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* ── Tema Ekosistem (13 Okt 2026): gaya clean ala kariranak.com, aksen HIJAU EARTHY (Karsa Circle), huruf Inter ──────
-     Dua mode: GELAP (bawaan :root) & TERANG ([data-theme="light"] di bawah). Mode dipasang di
-     <html data-theme> oleh skrip kecil di index.html (sebelum React jalan, biar gak kedip) dan
-     saklar "Mode gelap" di Sidebar. SEMUA warna komponen wajib lewat variabel di sini.
-     Toska #0FC1BD terlalu terang untuk teks putih (kontras 2,2:1) → teks di atas aksen pakai
-     --on-accent (toska gelap), dan aksen sebagai WARNA TEKS pakai --accent-light. */
   color-scheme: dark;
-  --bg-primary:    #141612;
-  --bg-surface:    #191c17;
-  --bg-card:       #1f231c;
-  --bg-card-hover: #262b23;
-  --bg-input:      #262b23;
-  --border:        rgba(255,255,255,0.08);
-  --border-hover:  rgba(255,255,255,0.16);
+  --bg-primary:    #111111;
+  --bg-surface:    #171717;
+  --bg-card:       #1e1e1e;
+  --bg-card-hover: #262626;
+  --bg-input:      #262626;
+  --border:        rgba(243,240,232,0.10);
+  --border-hover:  rgba(243,240,232,0.22);
+  --line:          rgba(243,240,232,0.55); /* garis tegas kartu & tombol */
 
-  --text:          #e8eaed;
-  --text-secondary:#a9b0b9;
-  --text-muted:    #8b929b;
+  --text:          #f3f0e8;
+  --text-secondary:#c9c4b5;
+  --text-muted:    #9b9688;
 
-  --accent:        #8fb174;
-  --accent-hover:  #a6c48d;
-  --accent-glow:   rgba(143,177,116,0.25);
-  --accent-subtle: rgba(143,177,116,0.13);
-  --accent-light:  #a6c48d;
-  --on-accent:     #1d2b12;
+  --accent:        #d6f53a;
+  --accent-hover:  #e2fa6a;
+  --accent-glow:   rgba(214,245,58,0.28);
+  --accent-subtle: rgba(214,245,58,0.14);
+  --accent-light:  #d6f53a;
+  --on-accent:     #111111;
 
-  --cyan:          #22b8d6;
-  --cyan-subtle:   rgba(34,184,214,0.13);
-  --green:         #10b981;
-  --green-subtle:  rgba(16,185,129,0.13);
-  --amber:         #f59e0b;
-  --amber-subtle:  rgba(245,158,11,0.13);
-  --red:           #ef4444;
-  --red-subtle:    rgba(239,68,68,0.13);
-  --pink:          #ec4899;
-  --pink-subtle:   rgba(236,72,153,0.13);
+  --pink-candy:    #f6a8e8; /* latar pink permen (banner, stiker) */
+  --on-pink:       #111111;
 
-  /* Lapisan netral: efek hover/latar tipis, lintasan progress bar, tirai modal */
+  --cyan:          #5cc8e0;
+  --cyan-subtle:   rgba(92,200,224,0.14);
+  --green:         #4ade80;
+  --green-subtle:  rgba(74,222,128,0.14);
+  --amber:         #fbbf24;
+  --amber-subtle:  rgba(251,191,36,0.14);
+  --red:           #ff6b6b;
+  --red-subtle:    rgba(255,107,107,0.14);
+  --pink:          #f6a8e8;
+  --pink-subtle:   rgba(246,168,232,0.16);
+
   --hover-overlay:  rgba(255,255,255,0.05);
-  --hover-strong:   rgba(255,255,255,0.08);
-  --track:          rgba(255,255,255,0.08);
-  --backdrop:       rgba(0,0,0,0.6);
+  --hover-strong:   rgba(255,255,255,0.09);
+  --track:          rgba(255,255,255,0.10);
+  --backdrop:       rgba(0,0,0,0.65);
+
+  --font-judul: 'Unbounded', 'Space Grotesk', system-ui, sans-serif;
+  --font-isi:   'Space Grotesk', system-ui, sans-serif;
 
   --sidebar-w: 256px;
   --header-h:  64px;
-  --radius:    12px;
-  --radius-sm: 8px;
-  --radius-xs: 6px;
-  --shadow:    0 4px 24px rgba(0,0,0,0.35);
-  --shadow-sm: 0 2px 10px rgba(0,0,0,0.25);
+  --radius:    22px;
+  --radius-sm: 14px;
+  --radius-xs: 8px;
+  --pill:      999px;
+  --shadow:    0 6px 0 rgba(0,0,0,0.45);
+  --shadow-sm: none;
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg-primary:    #f6f4ee;
-  --bg-surface:    #efece3;
-  --bg-card:       #fffdf8;
-  --bg-card-hover: #faf8f2;
-  --bg-input:      #fffdf8;
-  --border:        #e4e0d4;
-  --border-hover:  #cfc9b8;
+  --bg-primary:    #f3f0e8;
+  --bg-surface:    #ebe6d8;
+  --bg-card:       #fffdf6;
+  --bg-card-hover: #faf7ee;
+  --bg-input:      #fffdf6;
+  --border:        #ddd6c4;
+  --border-hover:  #bfb7a1;
+  --line:          #111111;
 
-  --text:          #3c3c3c;
-  --text-secondary:#5b6168;
-  --text-muted:    #6b7280;
+  --text:          #111111;
+  --text-secondary:#47443c;
+  --text-muted:    #6d685b;
 
-  --accent:        #7a9e62;
-  --accent-hover:  #6b8d54;
-  --accent-glow:   rgba(122,158,98,0.22);
-  --accent-subtle: rgba(122,158,98,0.12);
-  --accent-light:  #4b6a38;
-  --on-accent:     #1d2b12;
+  --accent:        #d6f53a;
+  --accent-hover:  #c8ea1f;
+  --accent-glow:   rgba(170,200,20,0.30);
+  --accent-subtle: rgba(214,245,58,0.38);
+  --accent-light:  #4a6400;
+  --on-accent:     #111111;
 
-  --cyan:          #0e7fa0;
-  --cyan-subtle:   rgba(14,127,160,0.10);
-  --green:         #0e8a5f;
-  --green-subtle:  rgba(14,138,95,0.10);
-  --amber:         #b45f06;
-  --amber-subtle:  rgba(180,95,6,0.10);
-  --red:           #d23a3a;
-  --red-subtle:    rgba(210,58,58,0.09);
-  --pink:          #c0266e;
-  --pink-subtle:   rgba(192,38,110,0.09);
+  --pink-candy:    #f6a8e8;
+  --on-pink:       #111111;
 
-  --hover-overlay:  rgba(0,0,0,0.035);
-  --hover-strong:   rgba(0,0,0,0.06);
-  --track:          #e9ebee;
-  --backdrop:       rgba(20,24,28,0.35);
+  --cyan:          #0e7490;
+  --cyan-subtle:   rgba(14,116,144,0.10);
+  --green:         #1f7a45;
+  --green-subtle:  rgba(31,122,69,0.11);
+  --amber:         #a35a00;
+  --amber-subtle:  rgba(163,90,0,0.10);
+  --red:           #c62828;
+  --red-subtle:    rgba(198,40,40,0.09);
+  --pink:          #b0268f;
+  --pink-subtle:   rgba(246,168,232,0.35);
 
-  --shadow:    0 4px 20px rgba(17,24,39,0.08);
-  --shadow-sm: 0 1px 6px rgba(17,24,39,0.06);
+  --hover-overlay:  rgba(0,0,0,0.04);
+  --hover-strong:   rgba(0,0,0,0.07);
+  --track:          #e2dccb;
+  --backdrop:       rgba(17,17,17,0.45);
+
+  --shadow:    0 6px 0 #111111;
+  --shadow-sm: none;
 }
-
 
 /* Warna seri grafik (palet kategorikal tervalidasi: biru, jingga, aqua, kuning) — selaras gelap/terang */
 :root { --seri-1: #3987e5; --seri-2: #d95926; --seri-3: #199e70; --seri-4: #c98500; --seri-5: #9a6fe0; --nada-ok: var(--green); --nada-warn: var(--amber); --nada-bad: var(--red); }

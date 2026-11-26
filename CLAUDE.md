@@ -67,7 +67,7 @@ lihat `openspec.md` § Navigasi.
 ## Key Conventions
 
 - **Gaya:** CSS biasa dengan token di `tema.css` (`--accent`, `--bg-card`, `--border`, ...); jangan hardcode warna. Aksen
-  per unit ditimpa dari `identitas.warna`. Mode terang/gelap (`data-theme`). Huruf Plus Jakarta Sans.
+  per unit ditimpa dari `identitas.warna`. Mode terang (krem, bawaan)/gelap (`data-theme`); menu kiri selalu hitam. Huruf Unbounded (judul) + Space Grotesk (isi). Karakter kru di `public/maskot/` lewat `Stiker.jsx`.
 - **Uang:** `formatRp()` dari `format.js` atau `rp()` / `usd()` lokal di `Keuangan.jsx` (`null` → "—").
 - **API:** `{ success, data }` / `{ success: false, message }`; `api()` melempar `Error` dengan `.status`, `.galat`.
 - **Otorisasi SELALU di server.** Frontend hanya menyembunyikan menu.

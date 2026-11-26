@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { masuk } from './api'
+import { MaskotGrup } from './Stiker'
 
 export default function Login({ onMasuk, identitas }) {
   const [email, setEmail] = useState('')
@@ -18,13 +19,14 @@ export default function Login({ onMasuk, identitas }) {
   return (
     <div className="login-bg">
       <form className="login-kartu" onSubmit={kirim}>
+        <div className="login-maskot"><MaskotGrup /></div>
         <div className="logo"><span>{(identitas?.nama ?? 'K')[0]}</span> {identitas?.nama ?? 'Unit Operations'}</div>
-        <p className="redup">Ruang kerja harian — produksi &amp; marketing.</p>
+        <p className="redup">Masuk ke ruang kerja studiomu.</p>
         <label>Email<input type="email" value={email} onChange={e => setEmail(e.target.value)} autoFocus required /></label>
         <label>Password<input type="password" value={password} onChange={e => setPassword(e.target.value)} required /></label>
         {galat && <div className="galat">{galat}</div>}
         <button className="btn utama" disabled={proses}>{proses ? 'Masuk…' : 'Masuk'}</button>
-        <p className="redup kecil">Akun sama dengan Management Dashboard.</p>
+        <p className="redup kecil">Lupa password? Hubungi koordinator studiomu.</p>
       </form>
     </div>
   )
