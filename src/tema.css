@@ -1,0 +1,106 @@
+/* Token tema disalin dari Ekosistem (client/src/styles/index.css) — gaya clean toska, terang/gelap. */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* ── Tema Ekosistem (13 Okt 2026): gaya clean ala kariranak.com, aksen TOSKA, huruf Inter ──────
+     Dua mode: GELAP (bawaan :root) & TERANG ([data-theme="light"] di bawah). Mode dipasang di
+     <html data-theme> oleh skrip kecil di index.html (sebelum React jalan, biar gak kedip) dan
+     saklar "Mode gelap" di Sidebar. SEMUA warna komponen wajib lewat variabel di sini.
+     Toska #0FC1BD terlalu terang untuk teks putih (kontras 2,2:1) → teks di atas aksen pakai
+     --on-accent (toska gelap), dan aksen sebagai WARNA TEKS pakai --accent-light. */
+  color-scheme: dark;
+  --bg-primary:    #121416;
+  --bg-surface:    #181a1d;
+  --bg-card:       #1e2124;
+  --bg-card-hover: #24282c;
+  --bg-input:      #24282c;
+  --border:        rgba(255,255,255,0.08);
+  --border-hover:  rgba(255,255,255,0.16);
+
+  --text:          #e8eaed;
+  --text-secondary:#a9b0b9;
+  --text-muted:    #8b929b;
+
+  --accent:        #0fc1bd;
+  --accent-hover:  #3dd6d2;
+  --accent-glow:   rgba(15,193,189,0.25);
+  --accent-subtle: rgba(15,193,189,0.13);
+  --accent-light:  #3dd6d2;
+  --on-accent:     #08302f;
+
+  --cyan:          #22b8d6;
+  --cyan-subtle:   rgba(34,184,214,0.13);
+  --green:         #10b981;
+  --green-subtle:  rgba(16,185,129,0.13);
+  --amber:         #f59e0b;
+  --amber-subtle:  rgba(245,158,11,0.13);
+  --red:           #ef4444;
+  --red-subtle:    rgba(239,68,68,0.13);
+  --pink:          #ec4899;
+  --pink-subtle:   rgba(236,72,153,0.13);
+
+  /* Lapisan netral: efek hover/latar tipis, lintasan progress bar, tirai modal */
+  --hover-overlay:  rgba(255,255,255,0.05);
+  --hover-strong:   rgba(255,255,255,0.08);
+  --track:          rgba(255,255,255,0.08);
+  --backdrop:       rgba(0,0,0,0.6);
+
+  --sidebar-w: 256px;
+  --header-h:  64px;
+  --radius:    12px;
+  --radius-sm: 8px;
+  --radius-xs: 6px;
+  --shadow:    0 4px 24px rgba(0,0,0,0.35);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.25);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg-primary:    #f7f7f7;
+  --bg-surface:    #f1f2f3;
+  --bg-card:       #ffffff;
+  --bg-card-hover: #fafafa;
+  --bg-input:      #ffffff;
+  --border:        #e5e7ea;
+  --border-hover:  #cdd1d6;
+
+  --text:          #3c3c3c;
+  --text-secondary:#5b6168;
+  --text-muted:    #6b7280;
+
+  --accent:        #0fc1bd;
+  --accent-hover:  #0cadaa;
+  --accent-glow:   rgba(15,193,189,0.22);
+  --accent-subtle: rgba(15,193,189,0.12);
+  --accent-light:  #087f7c;
+  --on-accent:     #08302f;
+
+  --cyan:          #0e7fa0;
+  --cyan-subtle:   rgba(14,127,160,0.10);
+  --green:         #0e8a5f;
+  --green-subtle:  rgba(14,138,95,0.10);
+  --amber:         #b45f06;
+  --amber-subtle:  rgba(180,95,6,0.10);
+  --red:           #d23a3a;
+  --red-subtle:    rgba(210,58,58,0.09);
+  --pink:          #c0266e;
+  --pink-subtle:   rgba(192,38,110,0.09);
+
+  --hover-overlay:  rgba(0,0,0,0.035);
+  --hover-strong:   rgba(0,0,0,0.06);
+  --track:          #e9ebee;
+  --backdrop:       rgba(20,24,28,0.35);
+
+  --shadow:    0 4px 20px rgba(17,24,39,0.08);
+  --shadow-sm: 0 1px 6px rgba(17,24,39,0.06);
+}
+
+
+/* Warna seri grafik (palet kategorikal tervalidasi: biru, jingga, aqua, kuning) — selaras gelap/terang */
+:root { --seri-1: #3987e5; --seri-2: #d95926; --seri-3: #199e70; --seri-4: #c98500; --seri-5: #9a6fe0; --nada-ok: var(--green); --nada-warn: var(--amber); --nada-bad: var(--red); }
+:root[data-theme="light"] { --seri-1: #2a78d6; --seri-2: #eb6834; --seri-3: #1baf7a; --seri-4: #eda100; --seri-5: #7c4dce; }
+
+/* Warna TAHAP kerja di papan (12 Nov 2026, masukan Ita): tiap tahap kerja (Sketch, Line Art, Animasi, …) dapat warna sendiri;
+   QC & Revisi tahap itu ikut warna induknya. Dipakai label tahap di kartu & tepi atas kolom "Per tahap". */
+:root { --tahap-1: #3987e5; --tahap-2: #d95926; --tahap-3: #199e70; --tahap-4: #c98500; --tahap-5: #a855f7; --tahap-6: #db2777; --tahap-7: #0891b2; --tahap-8: #65a30d; }
+:root[data-theme="light"] { --tahap-1: #2a78d6; --tahap-2: #d4561f; --tahap-3: #158a61; --tahap-4: #b07400; --tahap-5: #8b3fd9; --tahap-6: #be185d; --tahap-7: #0e7490; --tahap-8: #4d7c0f; }

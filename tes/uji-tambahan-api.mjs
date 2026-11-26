@@ -1,0 +1,100 @@
+import { DASH } from './_jalur.mjs'
+import { createRequire } from 'module'
+import crypto from 'crypto'
+const req = createRequire(DASH + '/server/package.json')
+req('dotenv').config({ path: DASH + '/server/.env', quiet: true })
+const jwt = req('jsonwebtoken'), bcrypt = req('bcrypt')
+const prisma = (await import(DASH + '/server/src/prisma.js')).default
+let gagal = 0; const cek = (l, ok, i = '') => { console.log(`${ok ? '✅' : '❌'} ${l}${i ? '  — ' + i : ''}`); if (!ok) gagal++ }
+let xff = 0
+const panggil = async (path, { method = 'GET', body, token, web } = {}) => { const r = await fetch('http://localhost:3001' + path, { method, headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': `172.43.1.${++xff % 250}`, ...(web ? { 'X-Unit-Web': web } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: body && JSON.stringify(body) }); return { s: r.status, j: await r.json().catch(() => ({})) } }
+const keiko = await prisma.studio.findFirst({ where: { nama: { contains: 'Keiko' } } })
+const pibi = await prisma.studio.findFirst({ where: { nama: { contains: 'Pibi' } } })
+const hash = await bcrypt.hash(crypto.randomBytes(8).toString('hex'), 4)
+const X = await import(DASH + '/server/src/utils/tambahanOgs.js')
+const { kunciTanggalWIB } = await import(DASH + '/server/src/utils/jamKerja.js')
+const W = (s) => new Date(s + '+07:00')
+console.log('— logika murni —')
+const o = { tanggalMasuk: W('2031-07-01T10:00'), deadline: W('2031-07-11T10:00'), status: 'PROSES', statusBayar: 'BELUM_LUNAS', nilaiKotor: 100 }
+const rw = [{ jenis: 'MASUK', mulai: W('2031-07-01T10:00'), selesai: W('2031-07-02T10:00') }, { jenis: 'KERJA', mulai: W('2031-07-02T10:00'), selesai: null }]
+let t = X.barisTimeline({ o, riwayat: rw, penanggung: ['A'], hariIni: '2031-07-05', sekarang: W('2031-07-05T10:00'), kunci: kunciTanggalWIB })
+cek('Timeline: plan 10 hari, aktual 3, sisa 6, sedang jalan, lunas belum', t.hariPlan === 10 && t.hariAktual === 3 && t.sisaHari === 6 && t.badge === 'sedang_jalan' && t.belumLunas && t.persenAktual === 30)
+t = X.barisTimeline({ o, riwayat: rw, penanggung: [], hariIni: '2031-07-15', sekarang: W('2031-07-15T10:00'), kunci: kunciTanggalWIB })
+cek('Lewat deadline → terlambat, tanpa penanggung', t.badge === 'terlambat' && t.sisaHari === -4 && t.tanpaPenanggung)
+t = X.barisTimeline({ o, riwayat: [rw[0]], penanggung: [], hariIni: '2031-07-05', sekarang: W('2031-07-05T10:00'), kunci: kunciTanggalWIB })
+cek('Masih di inbox → belum start', t.badge === 'belum_start' && t.hariAktual === 0)
+t = X.barisTimeline({ o, riwayat: [rw[0], { jenis: 'PREVIEW_KLIEN', mulai: W('2031-07-02T10:00'), selesai: null }], penanggung: ['A'], hariIni: '2031-07-15', sekarang: W('2031-07-15T10:00'), kunci: kunciTanggalWIB })
+cek('Menunggu klien lewat deadline → perlu update deadline', t.perluUpdateDeadline === true)
+t = X.barisTimeline({ o: { ...o, status: 'SELESAI', tanggalSelesai: W('2031-07-08T10:00') }, riwayat: rw, penanggung: [], hariIni: '2031-07-15', sekarang: W('2031-07-15T10:00'), kunci: kunciTanggalWIB })
+cek('Selesai → on_track, aktual berhenti di tanggal selesai (6 hari), tak dihitung tanpa penanggung', t.badge === 'on_track' && t.hariAktual === 6 && !t.tanpaPenanggung)
+const kp = X.kpiTimeline([{ selesai: false, sisaHari: -1, tanpaPenanggung: true }, { selesai: false, sisaHari: 2 }, { selesai: false, sisaHari: 9 }, { selesai: true, sisaHari: -3, belumLunas: true }])
+cek('KPI: terlambat 1, segera 1, tanpa penanggung 1, belum lunas 1', kp.terlambat === 1 && kp.segera === 1 && kp.tanpaPenanggung === 1 && kp.belumLunas === 1)
+cek('Rentang minggu (Rabu 2031-07-09 → 07–13); bulan Juli', JSON.stringify(X.rentangPeriode('minggu', '2031-07-09')) === '{"dari":"2031-07-07","sampai":"2031-07-13"}' && X.rentangPeriode('bulan', '2031-07-09').sampai === '2031-07-31')
+const jo = X.hitungJenisOrder([{ akunId: 'a', kategori: 'visual' }, { akunId: 'a', kategori: 'visual' }, { akunId: 'a', kategori: 'musik' }, { akunId: 'b', kategori: null }], new Map([['a', { platform: 'Fiverr', namaAkun: 'FA' }], ['b', { platform: 'Etsy', namaAkun: 'EB' }]]))
+cek('Jenis order: total 4, akun a 3 (visual 2), kategori kosong → Lainnya', jo.total === 4 && jo.akun[0].total === 3 && jo.akun[0].perKategori.visual === 2 && jo.akun[1].perKategori.Lainnya === 1 && jo.kategori[0] === 'visual')
+cek('Periode setoran: 15 Jul → 11 Jul, 24 Jun, 11 Jun; 5 Jul → 24 Jun, 11 Jun, 24 Mei? (hanya 2 bulan)', X.periodeSetoran('2031-07-15').join() === '2031-07-11,2031-06-24,2031-06-11' && X.periodeSetoran('2031-07-05').join() === '2031-06-24,2031-06-11,2031-05-24,2031-05-11'.split(',').slice(0, 2).join())
+const lap = X.susunLaporanHarian({ tanggal: '2031-07-09', marketer: [{ id: 'm1', nama: 'Mira' }, { id: 'm2', nama: 'Dewi' }], aktivitas: [{ userId: 'm1', jenis: 'publish_post', jumlah: 2, selesai: true }, { userId: 'm1', jenis: 'engage_reply', jumlah: 5, selesai: false }], katalog: [{ kunci: 'publish_post', label: 'Post', tahap: 'publish' }, { kunci: 'engage_reply', label: 'Reply', tahap: 'engage' }], tahapLabel: { publish: 'Publish', engage: 'Engage' } })
+cek('Laporan harian: judul Rabu 9 Jul 2031, Mira 7 aktivitas di atas, Dewi belum ada, peringatan belum selesai', lap.includes('Rabu, 9 Jul 2031') && lap.indexOf('Mira') < lap.indexOf('Dewi') && lap.includes('Mira · 7') && lap.includes('(belum ada aktivitas hari ini)') && lap.includes('⚠ 1 aktivitas belum selesai'))
+
+const dibuat = []
+const user = async (kode, roles) => { const u = await prisma.user.create({ data: { nama: 'Uji ' + kode, email: `uji.${kode}@uji.local`, passwordHash: hash, statusAktif: true } }); for (const [roleType, studioId, circleId] of roles) await prisma.userRole.create({ data: { userId: u.id, roleType, studioId: studioId ?? null, circleId: circleId ?? null } }); dibuat.push(u.id); return { id: u.id, t: jwt.sign({ id: u.id, aud: 'circle', cs: 'bloom' }, process.env.JWT_SECRET, { expiresIn: '10m' }), tNaya: jwt.sign({ id: u.id, aud: 'circle', cs: 'naya' }, process.env.JWT_SECRET, { expiresIn: '10m' }) } }
+const S = keiko.id, P = (t) => ({ token: t, web: 'bloom' })
+const orderIds = []
+let akun
+try {
+  const koord = await user('tb_koord', [['KOORDINATOR', S]]), mk = await user('tb_mk', [['KARYAWAN', S]]), mk2 = await user('tb_mk2', [['KARYAWAN', S]]), kar = await user('tb_kar', [['KARYAWAN', S]]), lain = await user('tb_lain', [['KOORDINATOR', pibi.id]])
+  akun = (await prisma.akunProduksi.findFirst({ where: { studioId: S } })) ?? await prisma.akunProduksi.create({ data: { studioId: S, platform: 'Internal', namaAkun: 'Order Internal', feePersen: 0 } })
+  await prisma.penugasanAkunMarketer.createMany({ data: [{ userId: mk.id, akunId: akun.id }, { userId: mk2.id, akunId: akun.id }], skipDuplicates: true })
+  await prisma.fungsiAnggota.createMany({ data: [{ userId: mk.id, studioId: S, fungsi: 'MARKETER' }, { userId: mk2.id, studioId: S, fungsi: 'MARKETER' }], skipDuplicates: true })
+  const sekarang = new Date()
+  const o1 = await prisma.orderProduksi.create({ data: { studioId: S, akunId: akun.id, klien: 'UJI-TB k', judul: 'UJI-TB terlambat', kategori: 'visual', nilaiKotor: 100, nilaiBersih: 100, status: 'PROSES', tanggalMasuk: new Date(sekarang.getTime() - 10 * 86400000), deadline: new Date(sekarang.getTime() - 2 * 86400000) } })
+  const o2 = await prisma.orderProduksi.create({ data: { studioId: S, akunId: akun.id, klien: 'UJI-TB k', judul: 'UJI-TB baru', kategori: 'musik', nilaiKotor: 100, nilaiBersih: 100, status: 'MASUK', deadline: new Date(sekarang.getTime() + 20 * 86400000) } })
+  orderIds.push(o1.id, o2.id)
+  await prisma.assignmentProduksi?.create?.({ data: { orderId: o1.id, userId: kar.id } }).catch(() => {})
+  console.log('— timeline —')
+  let r = await panggil('/api/circle/analitik/timeline?studioId=' + S, P(lain.t)); cek('Koordinator unit lain → 403', r.s === 403)
+  r = await panggil('/api/circle/analitik/timeline?studioId=' + S, { token: koord.tNaya, web: 'bloom' }); cek('Token circle lain → 403', r.s === 403)
+  r = await panggil('/api/circle/analitik/timeline?studioId=' + S + '&q=UJI-TB', P(koord.t)); const rows = r.j.data?.baris ?? []
+  cek('Koordinator melihat 2 order UJI-TB, urut deadline (terlambat dulu)', r.s === 200 && rows.length === 2 && rows[0].judul === 'UJI-TB terlambat' && rows[0].sisaHari < 0 && rows[0].badge !== 'on_track')
+  cek('KPI memuat terlambat ≥ 1 dan tanpa penanggung (order baru)', r.j.data.kpi.terlambat >= 1 && rows.find(x => x.judul === 'UJI-TB baru').tanpaPenanggung)
+  r = await panggil('/api/circle/analitik/timeline?studioId=' + S + '&q=UJI-TB', P(kar.t)); cek('Karyawan hanya melihat order yang ditugaskan padanya', r.s === 200 && r.j.data.baris.every(x => x.judul !== 'UJI-TB baru') )
+  console.log('— jenis order —')
+  r = await panggil('/api/circle/analitik/jenis-order?studioId=' + S + '&view=bulan', P(kar.t)); cek('Karyawan → 403', r.s === 403)
+  r = await panggil('/api/circle/analitik/jenis-order?studioId=' + S + '&view=bulan', P(koord.t)); cek('Bulan ini: order baru (musik) terhitung di akun', r.s === 200 && r.j.data.total >= 1 && r.j.data.kategori.includes('musik'))
+  r = await panggil('/api/circle/analitik/jenis-order?studioId=' + S + '&tanggal=bukan', P(koord.t)); cek('Tanggal tak valid → 422', r.s === 422)
+  console.log('— laporan harian —')
+  r = await panggil('/api/circle/marketing/laporan-harian?studioId=' + S, P(kar.t)); cek('Karyawan → 403', r.s === 403)
+  r = await panggil('/api/circle/marketing/laporan-harian?studioId=' + S, P(koord.t)); cek('Teks laporan memuat 2 marketer uji', r.s === 200 && r.j.data.teks.includes('Uji tb_mk ') || r.j.data.teks.includes('Uji tb_mk'))
+  console.log('— setoran marketer bebas waktu —')
+  const tglIni = new Date(Date.now() + 7 * 3600000).toISOString().slice(0, 10)
+  r = await panggil('/api/circle/setoran?studioId=' + S, P(kar.t)); cek('Karyawan → 403', r.s === 403)
+  r = await panggil('/api/circle/setoran', { method: 'POST', ...P(kar.t), body: { studioId: S } }); cek('Karyawan mencatat → 403', r.s === 403)
+  r = await panggil('/api/circle/setoran?studioId=' + S, P(koord.t)); cek('Tidak ada checklist otomatis; ringkasan memuat kedua marketer uji (belum pernah setor)', r.s === 200 && r.j.data.baris.length === 0 && r.j.data.ringkasan.some(x => x.marketerId === mk.id && x.terakhir === null) && r.j.data.ringkasan.some(x => x.marketerId === mk2.id))
+  r = await panggil('/api/circle/setoran', { method: 'POST', ...P(mk.t), body: { studioId: S, tanggal: '2031-01-01', jumlah: 1 } }); cek('Tanggal di masa depan → 422', r.s === 422)
+  r = await panggil('/api/circle/setoran', { method: 'POST', ...P(mk.t), body: { studioId: S, tanggal: '2020-01-01' } }); cek('Tanggal terlalu lama → 422', r.s === 422)
+  r = await panggil('/api/circle/setoran', { method: 'POST', ...P(mk.t), body: { studioId: S, jumlah: -5 } }); cek('Jumlah negatif → 422', r.s === 422)
+  r = await panggil('/api/circle/setoran', { method: 'POST', ...P(mk.t), body: { studioId: S, transferId: 'tidak-ada' } }); cek('Transfer asing → 422', r.s === 422)
+  r = await panggil('/api/circle/setoran', { method: 'POST', ...P(mk.t), body: { studioId: S, marketerId: mk2.id } }); cek('Marketer mencatatkan untuk orang lain → tetap atas namanya sendiri', r.s === 201)
+  r = await panggil('/api/circle/setoran', { method: 'POST', ...P(mk.t), body: { studioId: S, jumlah: 150000, catatan: 'hasil WD Etsy' } }); cek('Marketer mencatat setoran kapan saja (hari ini, Rp150.000) → 201', r.s === 201)
+  r = await panggil('/api/circle/setoran', { method: 'POST', ...P(koord.t), body: { studioId: S, marketerId: mk2.id, tanggal: tglIni, jumlah: 50000 } }); const idKoord = r.j.data?.id; cek('Koordinator mencatatkan untuk marketer lain → 201', r.s === 201)
+  r = await panggil('/api/circle/setoran', { method: 'POST', ...P(koord.t), body: { studioId: S, marketerId: kar.id } }); cek('Koordinator mencatatkan untuk non-marketer → 422', r.s === 422)
+  r = await panggil('/api/circle/setoran?studioId=' + S, P(koord.t)); const rk = r.j.data
+  cek('Koordinator melihat semua; ringkasan: mk 2× (total Rp150.000, terakhir hari ini), mk2 1×', r.s === 200 && rk.ringkasan.find(x => x.marketerId === mk.id)?.kali === 2 && rk.ringkasan.find(x => x.marketerId === mk.id)?.total === 150000 && rk.ringkasan.find(x => x.marketerId === mk.id)?.hariLalu === 0 && rk.ringkasan.find(x => x.marketerId === mk2.id)?.kali === 1)
+  cek('Catatan oleh koordinator menyebut pencatatnya', rk.baris.find(b => b.id === idKoord)?.dicatatOleh)
+  r = await panggil('/api/circle/setoran?studioId=' + S, P(mk.t)); cek('Marketer hanya melihat miliknya', r.s === 200 && r.j.data.baris.length === 2 && r.j.data.baris.every(b => b.marketerId === mk.id) && r.j.data.ringkasan.length === 1)
+  r = await panggil('/api/circle/setoran/' + idKoord, { method: 'DELETE', ...P(mk.t) }); cek('Marketer menghapus catatan orang lain → 403', r.s === 403)
+  r = await panggil('/api/circle/setoran/' + idKoord, { method: 'DELETE', ...P(lain.t) }); cek('Koordinator unit lain → 403', r.s === 403)
+  r = await panggil('/api/circle/setoran/' + idKoord, { method: 'DELETE', ...P(koord.t) }); cek('Koordinator menghapus → 200', r.s === 200)
+  r = await panggil('/api/circle/setoran?studioId=' + S + '&bulan=bukan', P(koord.t)); cek('Bulan tak valid → 422', r.s === 422)
+} finally {
+  await prisma.fungsiAnggota.deleteMany({ where: { userId: { in: dibuat } } })
+  await prisma.checklistSetor.deleteMany({ where: { marketerId: { in: dibuat } } }); await prisma.setoranMarketer.deleteMany({ where: { marketerId: { in: dibuat } } })
+  await prisma.penugasanAkunMarketer.deleteMany({ where: { userId: { in: dibuat } } })
+  await prisma.assignmentProduksi?.deleteMany?.({ where: { orderId: { in: orderIds } } }).catch(() => {})
+  await prisma.riwayatTahapOrder.deleteMany({ where: { orderId: { in: orderIds } } })
+  await prisma.orderProduksi.deleteMany({ where: { id: { in: orderIds } } })
+  await prisma.userRole.deleteMany({ where: { userId: { in: dibuat } } })
+  await prisma.user.deleteMany({ where: { id: { in: dibuat } } })
+  await prisma.$disconnect()
+}
+console.log(gagal ? `\n❌ ${gagal} gagal` : '\n✅ semua lulus'); process.exit(gagal ? 1 : 0)

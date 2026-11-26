@@ -1,0 +1,4 @@
+# Tambahan KECIL di blok app.domain-anda.com (location /), tepat setelah baris proxy_set_header X-Forwarded-Proto:
+        proxy_set_header X-Unit-Web app;
+# Tanpa baris ini Ekosistem tetap jalan (header kosong = Ekosistem), tapi dengan baris ini klien tidak bisa menyodorkan
+# 'bloom' ke app.domain-anda.com untuk mendapat token circle. Setelah diubah: nginx -t && systemctl reload nginx

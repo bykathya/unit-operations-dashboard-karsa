@@ -1,0 +1,48 @@
+import { DASH } from './_jalur.mjs'
+const M = await import(DASH + '/server/src/utils/marketing.js')
+let gagal = 0
+const t = (l, ok, i = '') => { console.log(`${ok ? '✅' : '❌'} ${l}${i ? '  — ' + i : ''}`); if (!ok) gagal++ }
+console.log('— katalog (15 aktivitas OGS + Lainnya, 13 Nov 2026) —')
+t('17 aktivitas (15 OGS + Follow up klien lama + Lainnya), kunci unik', M.KATALOG.length === 17 && new Set(M.DAFTAR_KUNCI).size === 17)
+t('4 tahap: publish 4, engage 4, network 4 (+ follow up klien), optimize 4', ['publish', 'engage', 'network', 'optimize'].map(x => M.KATALOG.filter(k => k.tahap === x).length).join() === '4,4,4,4')
+t('Semua KPI-bearing aktivitas terpetakan, network_* tanpa KPI', M.KATALOG.filter(k => !['network', 'lainnya'].includes(k.tahap)).every(k => M.AKTIVITAS_KE_KPI[k.kunci]) && !('network_dm' in M.AKTIVITAS_KE_KPI) && !('lainnya' in M.AKTIVITAS_KE_KPI))
+console.log('— rencana standar —')
+t('Oktober 2026 (31 hari): reply 155, post 14, update 8, seo 8', JSON.stringify(M.targetStandar(10, 2026)) === JSON.stringify({ post: 14, reply: 155, update: 8, seo: 8 }), JSON.stringify(M.targetStandar(10, 2026)))
+t('Februari 2026 (28 hari): reply 140, post 12', M.targetStandar(2, 2026).reply === 140 && M.targetStandar(2, 2026).post === 12)
+t('Februari 2028 (kabisat 29 hari): reply 145', M.targetStandar(2, 2028).reply === 145)
+console.log('— realisasi KPI —')
+const akt = [
+  { jenis: 'publish_post', selesai: true, jumlah: 1 }, { jenis: 'publish_video', selesai: true, jumlah: 2 }, { jenis: 'publish_post', selesai: false, jumlah: 5 },
+  { jenis: 'engage_reply', selesai: true, jumlah: 10 }, { jenis: 'engage_quote_tweet', selesai: true, jumlah: 1 }, { jenis: 'optimize_seo', selesai: true, jumlah: 1 },
+  { jenis: 'optimize_ab_test', selesai: true, jumlah: 3 }, { jenis: 'network_dm', selesai: true, jumlah: 9 }, { jenis: 'publish_post', selesai: true, jumlah: 0 },
+]
+const r = M.hitungKpi(akt)
+t('Hanya yang SELESAI dihitung, × jumlah (min 1)', JSON.stringify(r) === JSON.stringify({ post: 4, reply: 11, update: 3, seo: 1 }), JSON.stringify(r))
+const p = M.progresKpi({ post: 14, reply: 155, update: 8, seo: 0 }, r)
+t('Progres: persen dibulatkan, null bila target 0', p[0].persen === 29 && p[1].persen === 7 && p[3].persen === null, p.map(x => x.persen).join())
+console.log('— aturan wajib isi —')
+const g = (a) => M.validasiAktivitas(a).map(x => x.field).sort().join()
+t('Post tanpa isi apa pun → judul, platform, akun, link, jam posting wajib', g({ jenis: 'publish_post' }) === 'akunId,jamPosting,judul,link,platform')
+t('Post lengkap → sah', g({ jenis: 'publish_post', judul: 'Promo emote', platform: 'X', akunId: 'a1', link: 'https://x.com/a/1', jamPosting: '14:30' }) === '')
+t('Reply wajib akun yang dikomen + follower', g({ jenis: 'engage_reply', judul: 'x', platform: 'X', akunId: 'a', link: 'https://x.com/1' }) === 'pengikut,targetAkun')
+t('Reply lengkap (follower 0 sah)', g({ jenis: 'engage_reply', judul: 'x', platform: 'X', akunId: 'a', link: 'https://x.com/1', targetAkun: '@kuma', pengikut: 0 }) === '')
+t('Kolaborasi (tanpa akun) hanya butuh judul', g({ jenis: 'network_collaboration', judul: 'Collab dengan A' }) === '')
+t('Jam posting salah format ditolak', g({ jenis: 'publish_post', judul: 'x', platform: 'X', akunId: 'a', link: 'https://a.co', jamPosting: '25:99' }) === 'jamPosting')
+t('Link bukan http(s) ditolak', g({ jenis: 'optimize_seo', judul: 'x', platform: 'Etsy', akunId: 'a', link: 'javascript:alert(1)' }) === 'link')
+t('Platform sosmed untuk aktivitas marketplace-only ditolak (Post pakai X sah, Fiverr tidak)', g({ jenis: 'publish_post', judul: 'x', platform: 'Fiverr', akunId: 'a', link: 'https://a.co', jamPosting: '10:00' }) === 'platform')
+t('SEO boleh platform marketplace (Etsy)', g({ jenis: 'optimize_seo', judul: 'x', platform: 'Etsy', akunId: 'a', link: 'https://etsy.com/x' }) === '')
+t('Jumlah di luar 1–500 ditolak', g({ jenis: 'network_collaboration', judul: 'x', jumlah: 900 }) === 'jumlah')
+t('Jenis tak dikenal ditolak', g({ jenis: 'new_order', judul: 'x' }) === 'jenis')
+t('Akun milik studio lain ditolak', M.validasiAktivitas({ jenis: 'publish_post', judul: 'x', platform: 'X', akunId: 'lain', link: 'https://a.co', jamPosting: '10:00' }, { akunMilikStudio: new Set(['a1']) }).some(x => x.field === 'akunId'))
+t('Teks > 300 karakter ditolak', g({ jenis: 'network_collaboration', judul: 'x'.repeat(301) }) === 'judul')
+console.log('— suasana hati —')
+t('8 mood seperti OGS', M.MOOD.length === 8 && M.KUNCI_MOOD.includes('semangat') && M.KUNCI_MOOD.includes('marah'))
+console.log('— corong & efisiensi —')
+const c = M.susunCorong({ effort: 200, chat: 40, order: 10, preview: 8, delivery: 6 })
+t('Corong 5 tahap, laju dari tahap sebelumnya', c.length === 5 && c[1].lajuDariSebelumnya === 20 && c[2].lajuDariSebelumnya === 25 && c[3].lajuDariSebelumnya === 80 && c[0].lajuDariSebelumnya === null)
+t('Corong aman saat tahap sebelumnya 0 (tanpa bagi nol)', M.susunCorong({ effort: 0, chat: 5 })[1].lajuDariSebelumnya === null)
+t('Tahap yang MEMBESAR (order langsung tanpa prospek: 8 order dari 4 chat) tidak menampilkan laju menyesatkan', M.susunCorong({ effort: 100, chat: 4, order: 8 })[2].lajuDariSebelumnya === null)
+t('Laju Effort→Order: 10/200 = 5%, effort 0 → null', M.lajuEffortKeOrder(200, 10) === 5 && M.lajuEffortKeOrder(0, 3) === null)
+const pr = M.peringkatEfisiensi([{ nama: 'Aulia', effort: 100, order: 10 }, { nama: 'Budi', effort: 50, order: 10 }, { nama: 'Cici', effort: 0, order: 5 }, { nama: 'Dedi', effort: 200, order: 20 }])
+t('Peringkat: laju tertinggi dulu, seri → effort lebih besar; effort 0 dikeluarkan', pr.map(x => x.nama).join() === 'Budi,Dedi,Aulia' && pr[0].laju === 20 && pr.length === 3, pr.map(x => `${x.nama}:${x.laju}`).join())
+console.log(`\ngagal: ${gagal}`); process.exit(gagal ? 1 : 0)
