@@ -186,7 +186,7 @@ function Rincian({ studioId, p }) {
   )
 }
 
-function ItemTetap({ studioId, p }) {
+export function ItemTetap({ studioId, p }) {
   const [d, setD] = useState(null)
   const [kat, setKat] = useState([])
   const [f, setF] = useState({ kategoriId: '', nama: '', jumlahBawaan: '', global: false, rekeningId: null })
