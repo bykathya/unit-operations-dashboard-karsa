@@ -20,6 +20,7 @@ import Penugasan from './Penugasan'
 import Diskusi from './Diskusi'
 import Kaizen from './Kaizen'
 import Kehadiran from './Kehadiran'
+import Pemasukan from './Pemasukan'
 import Ltk from './Ltk' // menu LTK disembunyikan 10 Nov 2026 (masukan tim: yang dicatat hanya order deal; lempar ada di produksi). Fitur & data utuh — kembalikan dengan menambah ['ltk', 'Lempar-Terima (LTK)'] ke daftar tab
 import Beranda from './Beranda'
 import Penjualan from './Penjualan'
@@ -113,7 +114,7 @@ export default function App() {
   const tabDiskusi = ['diskusi', belumDibaca > 0 ? `Diskusi (${belumDibaca})` : 'Diskusi']
   const tabPanduan = ['mulai', mulai?.peran && mulai.disarankanSelesai < mulai.disarankanTotal ? 'Mulai di sini ●' : 'Mulai di sini']
   const daftarTab0 = kelola
-    ? [['beranda', 'Beranda'], ['mulai', mulai?.wajibSelesai ? (mulai.disarankanSelesai < mulai.disarankanTotal || (mulai.atasan && mulai.unitSiap?.some(u => !u.siap)) ? 'Mulai di sini ●' : 'Mulai di sini ✓') : 'Mulai di sini'], ['papan', 'Produksi'], ['marketing', 'Marketing'], ['tagihan', 'Tagihan'], ['setoran', 'Setoran marketer'], ['pembayaran', 'Belum dibayar klien'], ['bayarfreelance', 'Bayar freelance'], ['penjualan', 'Penjualan'], ['keuangan', 'Keuangan'], ['kas', 'Biaya & Kas'], ['buku', 'Tutup bulan'], ['analitik', 'Analitik'], ['kaizen', 'Evaluasi & Perbaikan'], ['tugas', 'Tugas saya'], ['laporan', 'Laporan tim'], ['hadir', 'Kehadiran'], ['penugasan', 'Penugasan'], ['akun', 'Akun jualan'], ['tim', 'Tim'], ['gaji', 'Penggajian'], ['alur', 'Alur'], ['updateklien', 'Update klien'], ['klien', 'Klien'], ['freelancer', 'Freelancer']]
+    ? [['beranda', 'Beranda'], ['mulai', mulai?.wajibSelesai ? (mulai.disarankanSelesai < mulai.disarankanTotal || (mulai.atasan && mulai.unitSiap?.some(u => !u.siap)) ? 'Mulai di sini ●' : 'Mulai di sini ✓') : 'Mulai di sini'], ['pemasukan', 'Pemasukan'], ['papan', 'Produksi'], ['marketing', 'Marketing'], ['tagihan', 'Tagihan'], ['setoran', 'Setoran marketer'], ['pembayaran', 'Belum dibayar klien'], ['bayarfreelance', 'Bayar freelance'], ['penjualan', 'Penjualan'], ['keuangan', 'Keuangan'], ['kas', 'Biaya & Kas'], ['buku', 'Tutup bulan'], ['analitik', 'Analitik'], ['kaizen', 'Evaluasi & Perbaikan'], ['tugas', 'Tugas saya'], ['laporan', 'Laporan tim'], ['hadir', 'Kehadiran'], ['penugasan', 'Penugasan'], ['akun', 'Akun jualan'], ['tim', 'Tim'], ['gaji', 'Penggajian'], ['alur', 'Alur'], ['updateklien', 'Update klien'], ['klien', 'Klien'], ['freelancer', 'Freelancer']]
     // Marketer (bukan Koordinator): hanya uang order/prospek miliknya sendiri — Tagihan & Penjualan (gabungan order semua orang) disembunyikan; server juga menolaknya
     // Marketer juga mendapat Produksi mode PANTAU (27 Okt 2026): papan lihat saja, nilai uang hanya order miliknya (server yang menyaring)
     : marketer ? [['beranda', 'Beranda'], tabPanduan, ['marketing', 'Marketing'], ['papan', 'Produksi'], ['updateklien', 'Update klien'], ['klien', 'Klien'], ['setoran', 'Setoran'], ['pembayaran', 'Belum dibayar klien'], ['tugas', 'Tugas saya'], ['laporan', 'Tugas selesai'], ['hadir', 'Kehadiran'], ['analitik', 'Kinerja saya']] : [['beranda', 'Beranda'], tabPanduan, ['tugas', 'Tugas saya'], ['laporan', 'Tugas selesai'], ['hadir', 'Kehadiran'], ['analitik', 'Kinerja saya']]
@@ -127,7 +128,8 @@ export default function App() {
   // Update klien pindah ke dalam Tugas saya (12 Nov 2026, masukan tim); pemilik unit (lihat saja, tanpa Tugas saya) tetap punya menunya
   // Karsa Circle (26 Nov 2026): menu yang tidak dipakai disembunyikan (kode & data tetap utuh).
   // Kembalikan dengan menghapus id-nya dari daftar ini.
-  const TAB_DISEMBUNYIKAN = ['penugasan', 'klien', 'updateklien', 'diskusi', 'marketing', 'tagihan', 'hadir']
+  // Tahap 2: alur tahapan order (Produksi, Tugas, Laporan tim, Alur, Setoran, Belum dibayar) diganti menu Pemasukan.
+  const TAB_DISEMBUNYIKAN = ['penugasan', 'klien', 'updateklien', 'diskusi', 'marketing', 'tagihan', 'hadir', 'papan', 'tugas', 'laporan', 'alur', 'setoran', 'pembayaran']
   const daftarTab = [...daftarTab1.filter(([k]) => lihatSaja || k !== 'updateklien'), ...(saya?.atasan ? [['manajemen', 'Manajemen']] : []), ['slip', 'Slip saya'], tabDiskusi]
     .filter(([k]) => !TAB_DISEMBUNYIKAN.includes(k))
   const tabAktif = daftarTab.some(([k]) => k === tab) ? tab : daftarTab[0][0]
@@ -193,6 +195,7 @@ export default function App() {
         {studioId && tabAktif === 'keuangan' && <Keuangan unit={(saya?.studios ?? []).filter(s => s.mode === 'kelola')} />}
         {studioId && tabAktif === 'updateklien' && <UpdateKlien key={studioId} studioId={studioId} />}
         {studioId && tabAktif === 'klien' && <Klien studioId={studioId} />}
+        {studioId && tabAktif === 'pemasukan' && <Pemasukan key={studioId} studioId={studioId} />}
         {studioId && tabAktif === 'freelancer' && <Freelancer studioId={studioId} lingkup={lingkup} />}
         {studioId && tabAktif === 'tim' && <Tim key={studioId} studioId={studioId} />}
         {studioId && tabAktif === 'alur' && <Alur key={studioId} studioId={studioId} />}
