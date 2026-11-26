@@ -63,7 +63,7 @@ export default function App() {
   // Etalase tiap circle: judul tab + warna aksen mengikuti circle di alamat ini (dari data Ekosistem, bukan kode).
   useEffect(() => {
     if (!identitas || identitas.aud !== 'circle') return
-    document.title = `${identitas.nama} · Unit Operations`
+    document.title = `${identitas.nama} · Kerja Harian`
     if (/^#[0-9a-f]{6}$/i.test(identitas.warna ?? '')) {
       const r = document.documentElement.style
       r.setProperty('--accent', identitas.warna); r.setProperty('--accent-hover', identitas.warna)
@@ -125,7 +125,11 @@ export default function App() {
   const TAB_KOORDINATOR = ['mulai', 'gaji', 'keuangan', 'kas', 'buku', 'kaizen']
   const daftarTab1 = lihatSaja ? daftarTab0.filter(([k]) => !TAB_PENGATURAN.includes(k)) : adminMarket ? daftarTab0.filter(([k]) => !TAB_KOORDINATOR.includes(k)) : daftarTab0
   // Update klien pindah ke dalam Tugas saya (12 Nov 2026, masukan tim); pemilik unit (lihat saja, tanpa Tugas saya) tetap punya menunya
+  // Karsa Circle (26 Nov 2026): menu yang tidak dipakai disembunyikan (kode & data tetap utuh).
+  // Kembalikan dengan menghapus id-nya dari daftar ini.
+  const TAB_DISEMBUNYIKAN = ['penugasan', 'klien', 'updateklien', 'diskusi', 'marketing', 'tagihan', 'hadir']
   const daftarTab = [...daftarTab1.filter(([k]) => lihatSaja || k !== 'updateklien'), ...(saya?.atasan ? [['manajemen', 'Manajemen']] : []), ['slip', 'Slip saya'], tabDiskusi]
+    .filter(([k]) => !TAB_DISEMBUNYIKAN.includes(k))
   const tabAktif = daftarTab.some(([k]) => k === tab) ? tab : daftarTab[0][0]
   const perCircle = Object.entries((saya?.studios ?? []).reduce((a, s) => { const k = s.circle?.nama ?? s.rumahUsaha?.nama ?? s.induk?.nama ?? 'Lainnya'; (a[k] ??= []).push(s); return a }, {}))
 
