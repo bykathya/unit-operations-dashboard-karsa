@@ -7,14 +7,14 @@ const IKON = {
   marketing: Megaphone, updateklien: MessageSquareText, klien: Contact, tagihan: FileText, pembayaran: CreditCard, bayarfreelance: BadgeDollarSign, setoran: HandCoins,
   penjualan: TrendingUp, keuangan: Wallet, kas: Coins, buku: BookCheck, gaji: Banknote, slip: Receipt,
   analitik: ChartColumn, kaizen: Lightbulb, tim: Users, penugasan: UserCog, freelancer: UserRoundSearch, manajemen: Building2,
-  akun: Store, alur: Workflow, pemasukan: HandCoins, arus: Wallet,
+  akun: Store, alur: Workflow, pemasukan: HandCoins, arus: Wallet, kru: Users, profil: UserCog,
 }
 const KELOMPOK = [
   ['', ['beranda', 'mulai']],
   ['Kerja harian', ['hadir', 'tugas', 'papan', 'laporan', 'diskusi']], // urutan hari kerja (13 Nov 2026, masukan tim): presensi dulu, lalu tugas, papan, laporan
   ['Penjualan & klien', ['marketing', 'updateklien', 'klien', 'tagihan', 'pembayaran', 'setoran']],
   ['Uang', ['pemasukan', 'penjualan', 'arus', 'keuangan', 'kas', 'bayarfreelance', 'buku', 'gaji', 'slip']],
-  ['Tim & kinerja', ['analitik', 'kaizen', 'tim', 'penugasan', 'freelancer', 'manajemen']],
+  ['Tim & kinerja', ['kru', 'profil', 'analitik', 'kaizen', 'tim', 'penugasan', 'freelancer', 'manajemen']],
   ['Pengaturan', ['akun', 'alur']],
 ]
 

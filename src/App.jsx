@@ -20,6 +20,8 @@ import Penugasan from './Penugasan'
 import Diskusi from './Diskusi'
 import Kaizen from './Kaizen'
 import Kehadiran from './Kehadiran'
+import TimKartu from './TimKartu'
+import ProfilSaya from './ProfilSaya'
 import ArusKas from './ArusKas'
 import Pemasukan from './Pemasukan'
 import Ltk from './Ltk' // menu LTK disembunyikan 10 Nov 2026 (masukan tim: yang dicatat hanya order deal; lempar ada di produksi). Fitur & data utuh — kembalikan dengan menambah ['ltk', 'Lempar-Terima (LTK)'] ke daftar tab
@@ -130,9 +132,10 @@ export default function App() {
   // Karsa Circle (26 Nov 2026): menu yang tidak dipakai disembunyikan (kode & data tetap utuh).
   // Kembalikan dengan menghapus id-nya dari daftar ini.
   // Tahap 2: alur tahapan order (Produksi, Tugas, Laporan tim, Alur, Setoran, Belum dibayar) diganti menu Pemasukan.
+  // Tahap 6: layar Tim lama (atur fungsi artist/marketer/PM) diganti kartu Tim + Profil saya untuk semua anggota.
   // Tahap 5: Keuangan dan Biaya & Kas diganti Arus Kas (Tutup bulan tetap ada untuk saldo awal rekening & tutup buku).
-  const TAB_DISEMBUNYIKAN = ['penugasan', 'klien', 'updateklien', 'diskusi', 'marketing', 'tagihan', 'hadir', 'papan', 'tugas', 'laporan', 'alur', 'setoran', 'pembayaran', 'keuangan', 'kas']
-  const daftarTab = [...daftarTab1.filter(([k]) => lihatSaja || k !== 'updateklien'), ...(saya?.atasan ? [['manajemen', 'Manajemen']] : []), ['slip', 'Slip saya'], tabDiskusi]
+  const TAB_DISEMBUNYIKAN = ['penugasan', 'klien', 'updateklien', 'diskusi', 'marketing', 'tagihan', 'hadir', 'papan', 'tugas', 'laporan', 'alur', 'setoran', 'pembayaran', 'keuangan', 'kas', 'tim']
+  const daftarTab = [...daftarTab1.filter(([k]) => lihatSaja || k !== 'updateklien'), ...(saya?.atasan ? [['manajemen', 'Manajemen']] : []), ['slip', 'Slip saya'], ['kru', 'Tim'], ['profil', 'Profil saya'], tabDiskusi]
     .filter(([k]) => !TAB_DISEMBUNYIKAN.includes(k))
   const tabAktif = daftarTab.some(([k]) => k === tab) ? tab : daftarTab[0][0]
   const perCircle = Object.entries((saya?.studios ?? []).reduce((a, s) => { const k = s.circle?.nama ?? s.rumahUsaha?.nama ?? s.induk?.nama ?? 'Lainnya'; (a[k] ??= []).push(s); return a }, {}))
@@ -182,6 +185,8 @@ export default function App() {
         {studioId && tabAktif === 'penjualan' && <Penjualan key={studioId} studioId={studioId} atasan={!!saya?.atasan || (kelola && !lihatSaja && !adminMarket)} />}
         {tabAktif === 'manajemen' && saya?.atasan && <Manajemen />}
         {tabAktif === 'slip' && <SlipSaya />}
+        {studioId && tabAktif === 'kru' && <TimKartu key={studioId} studioId={studioId} />}
+        {tabAktif === 'profil' && <ProfilSaya />}
         {studioId && tabAktif === 'pembayaran' && <Pembayaran key={studioId} studioId={studioId} />}
         {studioId && tabAktif === 'bayarfreelance' && <BayarFreelance key={studioId} studioId={studioId} />}
         {studioId && tabAktif === 'setoran' && <Setoran key={studioId} studioId={studioId} />}
