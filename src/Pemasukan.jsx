@@ -5,7 +5,7 @@ import { formatRp } from './format'
 import { useSegarkan } from './realtime'
 
 // CATATAN PEMASUKAN (Karsa Circle, 26 Nov 2026): pengganti alur tahapan order untuk studio yang hanya ingin mencatat
-// tanggal, jasa, nominal (USD), dan siapa yang mengerjakan. Data tetap disimpan sebagai order (langsung Selesai) di server.
+// tanggal, jasa, akun jualan, nominal (USD), dan siapa yang mengerjakan. Data tetap disimpan sebagai order (langsung Selesai) di server.
 const A = '/api/circle/pemasukan'
 const usd = (n) => (n == null ? '—' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }))
 const tgl = (t) => new Date(t).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' })
@@ -14,7 +14,7 @@ const kunciBulan = ({ bulan, tahun }) => `${tahun}-${String(bulan).padStart(2, '
 export default function Pemasukan({ studioId }) {
   const [periode, setPeriode] = useState(bulanSekarang)
   const [d, setD] = useState(null), [galat, setGalat] = useState(''), [form, setForm] = useState(false), [kirim, setKirim] = useState(false)
-  const kosong = { tanggal: hariIniLokal(), jasa: '', nilaiUsd: '', kurs: '', talentUserId: '', klien: '', lunas: true }
+  const kosong = { tanggal: hariIniLokal(), jasa: '', akunId: '', nilaiUsd: '', kurs: '', talentUserId: '', klien: '', lunas: true }
   const [f, setF] = useState(kosong)
 
   const muat = useCallback(() => api(`${A}?studioId=${studioId}&bulan=${kunciBulan(periode)}`).then(x => { setD(x); setGalat('') }).catch(e => setGalat(e.message)), [studioId, periode])
@@ -58,25 +58,27 @@ export default function Pemasukan({ studioId }) {
           <div className="dua">
             <label>Tanggal<input type="date" value={f.tanggal} onChange={e => setF({ ...f, tanggal: e.target.value })} required /></label>
             <label>Jasa<input list="jasa-pemasukan" value={f.jasa} onChange={e => setF({ ...f, jasa: e.target.value })} required maxLength={40} placeholder="mis. Original Song" /><datalist id="jasa-pemasukan">{d.pilihan.jasa.map(j => <option key={j} value={j} />)}</datalist></label>
+            <label>Akun jualan<select value={f.akunId} onChange={e => setF({ ...f, akunId: e.target.value })} required><option value="">— pilih —</option>{d.pilihan.akun.map(a => <option key={a.id} value={a.id}>{a.nama}{a.feePersen ? ` (potongan ${a.feePersen}%)` : ''}</option>)}<option value="INTERNAL">Order internal (tanpa platform)</option></select></label>
             <label>Nominal (USD)<input type="number" min="0.01" step="0.01" value={f.nilaiUsd} onChange={e => setF({ ...f, nilaiUsd: e.target.value })} required /></label>
             <label>Dikerjakan oleh<select value={f.talentUserId} onChange={e => setF({ ...f, talentUserId: e.target.value })} required><option value="">— pilih —</option>{d.pilihan.anggota.map(a => <option key={a.id} value={a.id}>{a.nama}</option>)}</select></label>
             <label>Kurs (Rp per 1 USD)<input type="number" min="1000" max="100000" step="1" value={f.kurs} onChange={e => setF({ ...f, kurs: e.target.value })} required /></label>
             <label>Nama klien (opsional)<input value={f.klien} onChange={e => setF({ ...f, klien: e.target.value })} maxLength={200} /></label>
           </div>
           <label style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><input type="checkbox" checked={f.lunas} onChange={e => setF({ ...f, lunas: e.target.checked })} /> Klien sudah bayar lunas</label>
-          <div className="redup kecil">{rpKira ? `≈ ${formatRp(rpKira)}. ` : ''}Kurs dipakai untuk menghitung gaji dan laporan dalam Rupiah; isian bawaan = kurs catatan terakhir.</div>
+          <div className="redup kecil">{rpKira ? `≈ ${formatRp(rpKira)}. ` : ''}Kurs dipakai untuk menghitung gaji dan laporan dalam Rupiah; isian bawaan = kurs catatan terakhir.{d.pilihan.akun.length === 0 ? ' Belum ada akun jualan: tambahkan dulu di menu Akun jualan, atau pilih Order internal.' : ''}</div>
           <div className="modal-aksi"><button type="button" className="btn" onClick={() => setForm(false)}>Batal</button><button className="btn utama" disabled={kirim}>{kirim ? 'Menyimpan…' : 'Simpan'}</button></div>
         </form>
       )}
 
       {d.baris.length === 0 ? <div className="kosong">Belum ada pemasukan di bulan ini.</div> : (
         <table>
-          <thead><tr><th>Tanggal</th><th>Jasa</th><th>Dikerjakan oleh</th><th className="kanan">Nominal</th><th>Bayar</th>{d.bolehUbah && <th />}</tr></thead>
+          <thead><tr><th>Tanggal</th><th>Jasa</th><th>Akun</th><th>Dikerjakan oleh</th><th className="kanan">Nominal</th><th>Bayar</th>{d.bolehUbah && <th />}</tr></thead>
           <tbody>
             {d.baris.map(b => (
               <tr key={b.id}>
                 <td>{tgl(b.tanggal)}</td>
                 <td>{b.jasa}{b.klien && b.klien !== 'Klien' && <div className="redup kecil">{b.klien}</div>}</td>
+                <td>{b.akun}</td>
                 <td>{b.dikerjakan.join(', ') || '—'}</td>
                 <td className="kanan">{usd(b.nilaiUsd)}</td>
                 <td>{d.bolehUbah
