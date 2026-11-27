@@ -359,7 +359,7 @@ function TabPerforma({ studioId, bulanKunci }) {
       <div className="panel">
         <div className="toolbar"><h3 className="judul-bagian" style={{ margin: 0 }}>Catatan lembur <span className="ds-arti">lembur = fee pekerjaan, nilainya ditentukan Koordinator saat menyetujui</span></h3>
           {d.bolehCatatLembur && !form && <button className="btn utama" style={{ marginLeft: 'auto' }} onClick={() => setForm(true)}>+ Catat lembur</button>}</div>
-        {d.modeLembur !== 'PER_PROYEK' && d.modeLembur !== 'PER_LEVEL' && <div className="galat-f kecil" style={{ marginBottom: 8 }}>Aturan lembur unit ini belum "per pekerjaan", jadi fee lembur dari sini belum ikut slip. Koordinator bisa mengubahnya di Kehadiran › Aturan lembur.</div>}
+        {d.modeLembur !== 'PER_PROYEK' && d.modeLembur !== 'PER_LEVEL' && <div className="galat-f kecil" style={{ marginBottom: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>Aturan lembur unit ini belum "per pekerjaan", jadi fee lembur dari sini belum ikut slip.{d.bolehUbah && <button type="button" className="btn kecil" onClick={() => aksi(() => api('/api/circle/lembur/aturan', { method: 'PUT', body: { studioId, mode: 'PER_PROYEK' } }))}>Jadikan per pekerjaan</button>}{!d.bolehUbah && ' Minta Koordinator mengubahnya.'}</div>}
         {form && (
           <form className="ds-form" onSubmit={kirimLembur}>
             <div className="dua">

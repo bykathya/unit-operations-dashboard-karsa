@@ -23,6 +23,7 @@ import Kehadiran from './Kehadiran'
 import TimKartu from './TimKartu'
 import ProfilSaya from './ProfilSaya'
 import ArusKas from './ArusKas'
+import InfoKalender from './InfoKalender'
 import DailySheet from './DailySheet' // menggantikan Pemasukan (27 Nov 2026); Pemasukan.jsx disimpan
 import Ltk from './Ltk' // menu LTK disembunyikan 10 Nov 2026 (masukan tim: yang dicatat hanya order deal; lempar ada di produksi). Fitur & data utuh — kembalikan dengan menambah ['ltk', 'Lempar-Terima (LTK)'] ke daftar tab
 import Beranda from './Beranda'
@@ -117,10 +118,10 @@ export default function App() {
   const tabDiskusi = ['diskusi', belumDibaca > 0 ? `Diskusi (${belumDibaca})` : 'Diskusi']
   const tabPanduan = ['mulai', mulai?.peran && mulai.disarankanSelesai < mulai.disarankanTotal ? 'Mulai di sini ●' : 'Mulai di sini']
   const daftarTab0 = kelola
-    ? [['beranda', 'Beranda'], ['mulai', mulai?.wajibSelesai ? (mulai.disarankanSelesai < mulai.disarankanTotal || (mulai.atasan && mulai.unitSiap?.some(u => !u.siap)) ? 'Mulai di sini ●' : 'Mulai di sini ✓') : 'Mulai di sini'], ['pemasukan', 'Daily Sheet'], ['papan', 'Produksi'], ['marketing', 'Marketing'], ['tagihan', 'Tagihan'], ['setoran', 'Setoran marketer'], ['pembayaran', 'Belum dibayar klien'], ['bayarfreelance', 'Bayar freelance'], ['penjualan', 'Progres Omset'], ['arus', 'Arus Kas'], ['keuangan', 'Keuangan'], ['kas', 'Biaya & Kas'], ['buku', 'Tutup bulan'], ['analitik', 'Analitik'], ['kaizen', 'Evaluasi & Perbaikan'], ['tugas', 'Tugas saya'], ['laporan', 'Laporan tim'], ['hadir', 'Kehadiran'], ['penugasan', 'Penugasan'], ['akun', 'Akun jualan'], ['tim', 'Tim'], ['gaji', 'Penggajian'], ['alur', 'Alur'], ['updateklien', 'Update klien'], ['klien', 'Klien'], ['freelancer', 'Freelancer']]
+    ? [['beranda', 'Beranda'], ['info', 'Info & Kalender'], ['mulai', mulai?.wajibSelesai ? (mulai.disarankanSelesai < mulai.disarankanTotal || (mulai.atasan && mulai.unitSiap?.some(u => !u.siap)) ? 'Mulai di sini ●' : 'Mulai di sini ✓') : 'Mulai di sini'], ['pemasukan', 'Daily Sheet'], ['papan', 'Produksi'], ['marketing', 'Marketing'], ['tagihan', 'Tagihan'], ['setoran', 'Setoran marketer'], ['pembayaran', 'Belum dibayar klien'], ['bayarfreelance', 'Bayar freelance'], ['penjualan', 'Progres Omset'], ['arus', 'Arus Kas'], ['keuangan', 'Keuangan'], ['kas', 'Biaya & Kas'], ['buku', 'Tutup bulan'], ['analitik', 'Analitik'], ['kaizen', 'Evaluasi & Perbaikan'], ['tugas', 'Tugas saya'], ['laporan', 'Laporan tim'], ['hadir', 'Kehadiran'], ['penugasan', 'Penugasan'], ['akun', 'Akun jualan'], ['tim', 'Tim'], ['gaji', 'Penggajian'], ['alur', 'Alur'], ['updateklien', 'Update klien'], ['klien', 'Klien'], ['freelancer', 'Freelancer']]
     // Marketer (bukan Koordinator): hanya uang order/prospek miliknya sendiri — Tagihan & Penjualan (gabungan order semua orang) disembunyikan; server juga menolaknya
     // Marketer juga mendapat Produksi mode PANTAU (27 Okt 2026): papan lihat saja, nilai uang hanya order miliknya (server yang menyaring)
-    : marketer ? [['beranda', 'Beranda'], tabPanduan, ['marketing', 'Marketing'], ['papan', 'Produksi'], ['updateklien', 'Update klien'], ['klien', 'Klien'], ['setoran', 'Setoran'], ['pembayaran', 'Belum dibayar klien'], ['tugas', 'Tugas saya'], ['laporan', 'Tugas selesai'], ['hadir', 'Kehadiran'], ['analitik', 'Kinerja saya']] : [['beranda', 'Beranda'], tabPanduan, ['tugas', 'Tugas saya'], ['laporan', 'Tugas selesai'], ['hadir', 'Kehadiran'], ['analitik', 'Kinerja saya']]
+    : marketer ? [['beranda', 'Beranda'], ['info', 'Info & Kalender'], tabPanduan, ['marketing', 'Marketing'], ['papan', 'Produksi'], ['updateklien', 'Update klien'], ['klien', 'Klien'], ['setoran', 'Setoran'], ['pembayaran', 'Belum dibayar klien'], ['tugas', 'Tugas saya'], ['laporan', 'Tugas selesai'], ['hadir', 'Kehadiran'], ['analitik', 'Kinerja saya']] : [['beranda', 'Beranda'], ['info', 'Info & Kalender'], tabPanduan, ['tugas', 'Tugas saya'], ['laporan', 'Tugas selesai'], ['hadir', 'Kehadiran'], ['analitik', 'Kinerja saya']]
   // PEMILIK unit (penerima SHU) tanpa peran pengelola: MODE LIHAT SAJA — tab pengaturan unit disembunyikan; server menolak semua perubahan
   const lihatSaja = !!studio?.lihatSaja
   const TAB_PENGATURAN = ['mulai', 'gaji', 'akun', 'tim', 'alur', 'penugasan', 'setoran', 'tugas']
@@ -202,6 +203,7 @@ export default function App() {
         {studioId && tabAktif === 'keuangan' && <Keuangan unit={(saya?.studios ?? []).filter(s => s.mode === 'kelola')} />}
         {studioId && tabAktif === 'updateklien' && <UpdateKlien key={studioId} studioId={studioId} />}
         {studioId && tabAktif === 'klien' && <Klien studioId={studioId} />}
+        {studioId && tabAktif === 'info' && <InfoKalender key={studioId} />}
         {studioId && tabAktif === 'pemasukan' && <DailySheet key={studioId} studioId={studioId} lingkup={lingkup} pindah={setTab} />}
         {studioId && tabAktif === 'arus' && <ArusKas key={studioId} studioId={studioId} />}
         {studioId && tabAktif === 'freelancer' && <Freelancer studioId={studioId} lingkup={lingkup} />}
