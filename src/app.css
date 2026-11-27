@@ -426,3 +426,14 @@ input:focus, select:focus, textarea:focus { border-color: var(--line); outline: 
 .ik-kotak.libur { background: var(--hover-strong); border: 1px solid var(--border-hover); }
 .ik-ev { border-left: 3px solid var(--accent); padding: 4px 0 4px 10px; margin-bottom: 8px; }
 @media (max-width: 860px) { .ik-kal { grid-template-columns: 1fr; } }
+
+/* Manifest & SOP (Karsa, 27 Nov 2026) */
+.mf-orang { display: flex; align-items: center; gap: 10px; }
+.mf-orang .stiker { border-radius: 50%; background: var(--bg-surface); }
+.mf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.mf-kartu.mf-kosong { border-style: dashed; background: transparent; }
+.sop-kat { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.sop-kat button { text-align: left; display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text); cursor: pointer; }
+.sop-kat button.aktif { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.sop-kat button.aktif .redup { color: inherit; opacity: .75; }
+.sop-judul { display: flex; width: 100%; justify-content: space-between; gap: 10px; text-align: left; background: none; border: 0; padding: 0; color: var(--text); cursor: pointer; font: inherit; }
