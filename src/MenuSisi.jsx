@@ -7,7 +7,7 @@ const IKON = {
   marketing: Megaphone, updateklien: MessageSquareText, klien: Contact, tagihan: FileText, pembayaran: CreditCard, bayarfreelance: BadgeDollarSign, setoran: HandCoins,
   penjualan: TrendingUp, keuangan: Wallet, kas: Coins, buku: BookCheck, gaji: Banknote, slip: Receipt,
   analitik: ChartColumn, kaizen: Lightbulb, tim: Users, penugasan: UserCog, freelancer: UserRoundSearch, manajemen: Building2,
-  akun: Store, alur: Workflow, pemasukan: HandCoins, arus: Wallet, kru: Users, profil: UserCog,
+  akun: Store, alur: Workflow, pemasukan: ClipboardList, arus: Wallet, kru: Users, profil: UserCog,
 }
 const KELOMPOK = [
   ['', ['beranda', 'mulai']],

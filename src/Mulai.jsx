@@ -128,7 +128,7 @@ export default function Mulai({ status: d, studioId, muat, pindah, bukaUnit }) {
           <p className="redup">{!berikut ? 'Semua langkah beres. Terima kasih sudah menyiapkan unit dengan rapi.'
             : d.wajibSelesai ? `Tinggal ${semua.length - nSelesai} langkah lagi supaya angka kas, gaji, dan omset lengkap. Kerjakan pelan-pelan, satu per satu.`
             : `Selesaikan Tahap 1 (${d.wajib.filter(l => l.selesai).length}/${d.wajib.length}) dulu. Setelah itu pemasukan unit bisa mulai dicatat.`}</p>
-          {d.wajibSelesai && <button className="btn kecil" style={{ marginTop: 6 }} onClick={() => pindah('pemasukan')}><PartyPopper size={14} style={{ verticalAlign: '-2px' }} /> Buka Pemasukan</button>}
+          {d.wajibSelesai && <button className="btn kecil" style={{ marginTop: 6 }} onClick={() => pindah('pemasukan')}><PartyPopper size={14} style={{ verticalAlign: '-2px' }} /> Buka Daily Sheet</button>}
         </div>
       </div>
 

@@ -373,3 +373,38 @@ input:focus, select:focus, textarea:focus { border-color: var(--line); outline: 
 .sapaan .redup { color: #2f2f2f; }
 .stiker { flex: none; display: block; height: auto; }
 @media (max-width: 640px) { .sapaan { padding: 16px; } .sapaan h2 { font-size: 20px; } .sapaan .stiker { width: 96px; } }
+
+/* Daily Sheet (Karsa Circle, 27 Nov 2026) */
+.ds-arti { display: block; font-size: 12px; font-weight: 400; color: var(--text-muted); line-height: 1.45; text-transform: none; letter-spacing: 0; }
+.judul-bagian .ds-arti { display: inline; margin-left: 6px; }
+.stat.ds-sorot { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.stat.ds-sorot .ds-arti { color: inherit; opacity: .75; }
+.ds-dua { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.ds-split { display: flex; height: 12px; border-radius: 99px; overflow: hidden; background: var(--track); margin: 6px 0 10px; }
+.ds-split i { display: block; height: 100%; }
+.ds-legenda { display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.ds-legenda > div { display: flex; justify-content: space-between; gap: 10px; }
+.ds-titik { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; border: 1px solid var(--border-hover); vertical-align: -1px; }
+.ds-form { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px; background: var(--bg-surface); display: flex; flex-direction: column; gap: 10px; }
+.ds-gulir { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ds-tabel select, .ds-tabel input[type="date"] { padding: 4px 6px; font-size: 12.5px; max-width: 150px; }
+.ds-angka { width: 80px; padding: 4px 6px; text-align: right; }
+.ds-jalur { display: block; margin-top: 4px; }
+.btn.ds-lunas { background: var(--green-subtle); color: var(--green); border-color: var(--green); }
+@media (max-width: 760px) {
+  .ds-dua { grid-template-columns: 1fr; }
+  .ds-tabel thead { display: none; }
+  .ds-tabel, .ds-tabel tbody, .ds-tabel tr, .ds-tabel td { display: block; width: 100%; }
+  .ds-tabel tr { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px; margin-bottom: 8px; background: var(--bg-card); }
+  .ds-tabel td { border: 0; padding: 5px 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; text-align: right; }
+  .ds-tabel td::before { content: attr(data-label); font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-align: left; flex-shrink: 0; }
+  .ds-tabel td[data-label=""]::before { content: none; }
+  .ds-tabel td.kanan { text-align: right; }
+  .ds-tabel td[colspan] { display: block; text-align: center; }
+  .ds-tabel td[colspan]::before { content: none; }
+}
+.ds-centang { display: flex !important; flex-direction: row !important; align-items: center; gap: 8px; justify-content: flex-start; }
+.ds-centang input { width: auto; }
+.ds-tabel select { min-width: 96px; }
+@media (max-width: 760px) { .ds-tabel { min-width: 0 !important; } .ds-tabel select, .ds-tabel input[type="date"] { max-width: 60%; } }
+@media (max-width: 760px) { .ds-tabel .ds-isi { text-align: right; min-width: 0; } .ds-tabel .ds-isi > select, .ds-tabel .ds-isi > input { max-width: 100%; } .ds-tabel .ds-isi .ds-jalur { margin-left: auto; } }
