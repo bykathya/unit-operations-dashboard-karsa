@@ -3,14 +3,14 @@ import { House, Rocket, SquareKanban, ListChecks, ClipboardList, CalendarCheck, 
 // Sidebar berkelompok + ikon (11 Nov 2026, permintaan user: menu panjang polos bikin malas). Isi & urutan tab tetap dari App.jsx
 // (per peran); di sini hanya dikelompokkan & diberi ikon. Kelompok kosong tidak tampil.
 const IKON = {
-  beranda: House, mulai: Rocket, papan: SquareKanban, tugas: ListChecks, laporan: ClipboardList, hadir: CalendarCheck, diskusi: MessagesSquare,
+  beranda: House, info: CalendarCheck, mulai: Rocket, papan: SquareKanban, tugas: ListChecks, laporan: ClipboardList, hadir: CalendarCheck, diskusi: MessagesSquare,
   marketing: Megaphone, updateklien: MessageSquareText, klien: Contact, tagihan: FileText, pembayaran: CreditCard, bayarfreelance: BadgeDollarSign, setoran: HandCoins,
   penjualan: TrendingUp, keuangan: Wallet, kas: Coins, buku: BookCheck, gaji: Banknote, slip: Receipt,
   analitik: ChartColumn, kaizen: Lightbulb, tim: Users, penugasan: UserCog, freelancer: UserRoundSearch, manajemen: Building2,
   akun: Store, alur: Workflow, pemasukan: ClipboardList, arus: Wallet, kru: Users, profil: UserCog,
 }
 const KELOMPOK = [
-  ['', ['beranda', 'mulai']],
+  ['', ['beranda', 'info', 'mulai']],
   ['Kerja harian', ['hadir', 'tugas', 'papan', 'laporan', 'diskusi']], // urutan hari kerja (13 Nov 2026, masukan tim): presensi dulu, lalu tugas, papan, laporan
   ['Penjualan & klien', ['marketing', 'updateklien', 'klien', 'tagihan', 'pembayaran', 'setoran']],
   ['Uang', ['pemasukan', 'penjualan', 'arus', 'keuangan', 'kas', 'bayarfreelance', 'buku', 'gaji', 'slip']],
