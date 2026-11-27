@@ -179,7 +179,7 @@ export default function App() {
         {studioId && tabAktif === 'buku' && <BukuBesar unit={(saya?.studios ?? []).filter(s => s.mode === 'kelola')} superAdmin={!!saya?.superAdmin} unitAwal={studioId} />}
         {studioId && tabAktif === 'penugasan' && <Penugasan unit={(saya?.studios ?? []).filter(s => s.mode === 'kelola')} />}
         {studioId && tabAktif === 'hadir' && <Kehadiran key={studioId} studioId={studioId} manajer={kelola && !adminMarket} lihatSaja={lihatSaja} userId={user.id} />}
-        {studioId && tabAktif === 'beranda' && <Beranda key={studioId} studioId={studioId} pindah={setTab} onOrder={() => setTab(kelola || marketer ? 'papan' : 'tugas')} />}
+        {studioId && tabAktif === 'beranda' && <Beranda key={studioId} studioId={studioId} pindah={setTab} bisa={(k) => daftarTab.some(([x]) => x === k)} onOrder={() => setTab(kelola || marketer ? 'papan' : 'tugas')} />}
         {studioId && tabAktif === 'laporan' && <Laporan key={studioId} studioId={studioId} manajer={kelola} />}
         {studioId && tabAktif === 'ltk' && <Ltk key={studioId} studioId={studioId} onOrder={() => setTab('papan')} />}
         {studioId && tabAktif === 'penjualan' && <Penjualan key={studioId} studioId={studioId} atasan={!!saya?.atasan || (kelola && !lihatSaja && !adminMarket)} />}

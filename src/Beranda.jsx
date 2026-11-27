@@ -6,7 +6,9 @@ import Stiker from './Stiker'
 // BERANDA per peran (adaptasi OGS HomeComposer): sapaan, "perlu perhatian", task saya, pengingat delivery H-1…5, ringkasan manajer/marketer, seri 8 minggu.
 // Tanpa angka uang.
 const NAMA_TAB = {}
-export default function Beranda({ studioId, pindah, onOrder }) {
+// Karsa Circle (27 Nov 2026): `bisa(tab)` = menu itu tampil untuk orang ini. Tautan & bagian yang menuju menu tersembunyi
+// (Tugas saya, Kehadiran, Marketing, Penugasan) tidak ditampilkan supaya tombolnya tidak melempar ke Beranda.
+export default function Beranda({ studioId, pindah, onOrder, bisa = () => true }) {
   const [d, setD] = useState(null), [galat, setGalat] = useState('')
   const muat = useCallback(() => api(`/api/circle/beranda?studioId=${studioId}`).then(x => { setD(x); setGalat('') }).catch(e => setGalat(e.message)), [studioId])
   useEffect(() => { setD(null); muat() }, [muat])
@@ -14,7 +16,7 @@ export default function Beranda({ studioId, pindah, onOrder }) {
   if (!d) return <div className="redup">{galat || 'Memuat…'}</div>
   const tgl = new Date(d.tanggal + 'T00:00:00Z').toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
   const maks = Math.max(1, ...(d.seri ?? []).flatMap(s => [s.masuk, s.selesai]))
-  const Stat = ({ l, n, tab, nada }) => <button className={'stat' + (nada ? ' ' + nada : '')} style={{ textAlign: 'left', cursor: tab ? 'pointer' : 'default' }} onClick={() => tab && pindah(tab)}><span className="redup kecil">{l}</span><b>{n}</b></button>
+  const Stat = ({ l, n, tab, nada }) => <button className={'stat' + (nada ? ' ' + nada : '')} style={{ textAlign: 'left', cursor: tab && bisa(tab) ? 'pointer' : 'default' }} onClick={() => tab && bisa(tab) && pindah(tab)}><span className="redup kecil">{l}</span><b>{n}</b></button>
   // Kotak bernilai nol diringkas jadi satu baris "aman" (11 Nov 2026) — yang ada angkanya jadi menonjol, bukan lautan angka 0
   const Deret = ({ isi, nada, semuaNol, apaAdanya }) => {
     isi = isi.filter(x => x.n != null) // angka yang tidak boleh dilihat peran ini dikirim null oleh server
@@ -22,22 +24,23 @@ export default function Beranda({ studioId, pindah, onOrder }) {
     if (apaAdanya) return <div className="deret-stat">{isi.map(x => <Stat key={x.l} {...x} />)}</div> // tampil apa adanya: nol di sini = belum dikerjakan, bukan "aman"
     return <div className="deret-stat">{ada.map(x => <Stat key={x.l} {...x} nada={x.nada ?? nada} />)}{kosong.length > 0 && <div className="stat-aman"><span aria-hidden="true">✓</span> {!ada.length && semuaNol ? semuaNol : <>{ada.length ? '' : 'Semua aman: '}{kosong.map(x => x.l.toLowerCase()).join(' · ')} <b>0</b></>}</div>}</div>
   }
+  const perhatian = d.perhatian.filter(p => bisa(p.tab))
   return (
     <div>
       <div className="sapaan">
         <div><h2>{d.sapaan}, {d.nama.split(' ')[0]}</h2><div className="redup">{tgl}</div></div>
         <Stiker nama={d.nama} ukuran={140} />
       </div>
-      {d.perhatian.length > 0 ? (
+      {perhatian.length > 0 ? (
         <div className="panel"><h3 className="judul-bagian">Perlu perhatian</h3>
-          {d.perhatian.map(p => <div key={p.kunci} className="meta" style={{ marginBottom: 6 }}><span className="lencana revisi">{p.jumlah}</span><span>{p.label}</span><button className="btn kecil" onClick={() => { if (p.kunci === 'lembur') { try { localStorage.setItem(`tugas-sub-${studioId}`, 'lembur') } catch { /* abaikan */ } } pindah(p.tab) }}>Buka</button></div>)}
+          {perhatian.map(p => <div key={p.kunci} className="meta" style={{ marginBottom: 6 }}><span className="lencana revisi">{p.jumlah}</span><span>{p.label}</span><button className="btn kecil" onClick={() => { if (p.kunci === 'lembur') { try { localStorage.setItem(`tugas-sub-${studioId}`, 'lembur') } catch { /* abaikan */ } } pindah(p.tab) }}>Buka</button></div>)}
         </div>
       ) : <div className="panel"><span>✅ Tidak ada yang perlu perhatian khusus hari ini.</span></div>}
-      <h3 className="judul-bagian" style={{ marginTop: 18 }}>Tugasku</h3>
-      <Deret isi={[{ l: 'Tugas aktif', n: d.tugasSaya.aktif, tab: 'tugas' }, { l: 'Lewat deadline', n: d.tugasSaya.telat ?? 0, tab: 'tugas', nada: 'waspada' }, { l: 'Selesai hari ini', n: d.tugasSaya.selesaiHariIni, tab: 'tugas' }]} semuaNol="Belum ada tugas berjalan" />
+      {bisa('tugas') && <><h3 className="judul-bagian" style={{ marginTop: 18 }}>Tugasku</h3>
+      <Deret isi={[{ l: 'Tugas aktif', n: d.tugasSaya.aktif, tab: 'tugas' }, { l: 'Lewat deadline', n: d.tugasSaya.telat ?? 0, tab: 'tugas', nada: 'waspada' }, { l: 'Selesai hari ini', n: d.tugasSaya.selesaiHariIni, tab: 'tugas' }]} semuaNol="Belum ada tugas berjalan" /></>}
       {d.manajer && <><h3 className="judul-bagian" style={{ marginTop: 6 }}>Unit</h3>
         <Deret nada="waspada" isi={[{ l: 'Order terlambat', n: d.manajer.terlambat, tab: 'analitik' }, { l: 'Jatuh tempo ≤ 3 hari', n: d.manajer.segera, tab: 'analitik' }, { l: 'Tanpa penanggung', n: d.manajer.tanpaPenanggung, tab: 'penugasan' }, { l: 'Izin menunggu', n: d.manajer.izinMenunggu, tab: 'hadir' }, { l: 'Perlu dukungan', n: d.manajer.perluDukungan, tab: 'hadir' }]} /></>}
-      {d.marketer && <><h3 className="judul-bagian" style={{ marginTop: 6 }}>Pemasaran</h3>
+      {d.marketer && bisa('marketing') && <><h3 className="judul-bagian" style={{ marginTop: 6 }}>Pemasaran</h3>
         <Deret isi={[{ l: 'Aktivitas hari ini', n: `${d.marketer.selesai}/${d.marketer.aktivitasHariIni}`, tab: 'marketing', nada: d.marketer.aktivitasHariIni === 0 ? 'waspada' : undefined }, { l: 'Setoran bulan ini', n: `${d.marketer.setoranBulanIni ?? 0}×`, tab: 'setoran' }]} apaAdanya /></>}
       <div className="panel"><h3 className="judul-bagian">Pengingat delivery</h3>
         <div className="chips" style={{ marginBottom: 8 }}>{[['H-1', d.delivery.h1], ['H-2', d.delivery.h2], ['H-3', d.delivery.h3], ['H-4–5', d.delivery.h4_5]].map(([l, n]) => <span key={l} className={'lencana' + (l === 'H-1' && n ? ' revisi' : '')}>{l}: {n}</span>)}</div>

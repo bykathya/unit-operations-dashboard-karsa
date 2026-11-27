@@ -5,11 +5,12 @@ import { api } from './api'
 // "MULAI DI SINI" v3 (tampilan 11 Nov 2026 — dulu satu daftar panjang yang bikin malas memulai):
 // cincin progres + SATU kartu "Langkah berikutnya" → langkah dikelompokkan jadi 3 tahap (yang beres dilipat) → penjelasan panjang
 // dilipat ke "Cara mengisi". Data tetap dari server (wajib/disarankan/lingkup/unitSiap); marketer & talent memakai MulaiPribadi.
+// Karsa Circle (27 Nov 2026): langkah mengikuti menu Karsa (Pemasukan, Arus Kas, Tutup bulan, Penggajian, Progres Omset, Tim)
 const TAHAP = [
-  { judul: 'Siap bekerja', ket: 'Sekali di awal, supaya unit bisa menerima order.', kunci: ['tim', 'akun', 'alur'] },
+  { judul: 'Siap bekerja', ket: 'Sekali di awal, supaya pemasukan bisa dicatat.', kunci: ['akun'] },
   // Bio studio dulu (12 Nov 2026): saldo awal per rekening & gaji di Tutup bulan dibaca dari Bio
-  { judul: 'Uang & gaji', ket: 'Bio studio sebagai sumber, lalu saldo awal kas, gaji, invoice, dan lembur.', kunci: ['bio', 'buku', 'gaji', 'penerbit', 'lembur'] },
-  { judul: 'Biar makin rapi', ket: 'Penugasan otomatis, target, pembagian akun, dan data tim.', kunci: ['keahlian', 'target', 'marketer', 'adminAkun', 'telegram', 'posisi'] },
+  { judul: 'Uang & gaji', ket: 'Bio studio sebagai sumber, lalu saldo awal kas dan gaji.', kunci: ['bio', 'buku', 'gaji'] },
+  { judul: 'Biar makin rapi', ket: 'Target omset dan profil anggota.', kunci: ['target', 'profil'] },
 ]
 
 function Cincin({ n, total, ukuran = 76 }) {
@@ -83,8 +84,8 @@ function MulaiPribadi({ d, pindah }) {
         <div>
           <h2>{semua ? 'Hari ini beres semua 👍' : `Hari ini: ${d.disarankanSelesai} dari ${d.disarankanTotal} beres`}</h2>
           <p className="redup">{d.peran === 'marketer'
-            ? 'Kamu memegang akun jualan: mencari klien, mencatat order, dan menjaga klien sampai pekerjaannya selesai dan dibayar.'
-            : 'Kerjamu dimulai dari Tugas saya: kerjakan tugas yang diberikan, perbarui progresnya, lalu tandai selesai.'}</p>
+            ? 'Lengkapi profilmu supaya teman satu circle kenal kamu, lalu lihat slip gajimu di Slip saya.'
+            : 'Lengkapi profilmu supaya teman satu circle kenal kamu, lalu lihat slip gajimu di Slip saya.'}</p>
         </div>
       </div>
       <h3 className="judul-bagian">Hari ini</h3>
@@ -125,9 +126,9 @@ export default function Mulai({ status: d, studioId, muat, pindah, bukaUnit }) {
         <div>
           <h2>{!berikut ? 'Unit siap sepenuhnya 🎉' : d.wajibSelesai ? 'Unit sudah bisa bekerja' : 'Ayo siapkan unitmu'}</h2>
           <p className="redup">{!berikut ? 'Semua langkah beres. Terima kasih sudah menyiapkan unit dengan rapi.'
-            : d.wajibSelesai ? `Tinggal ${semua.length - nSelesai} langkah lagi supaya angka & otomatisasi berjalan penuh. Kerjakan pelan-pelan, satu per satu.`
-            : `Selesaikan Tahap 1 (${d.wajib.filter(l => l.selesai).length}/${d.wajib.length}) dulu. Setelah itu unit bisa menerima order dan memberi tugas.`}</p>
-          {d.wajibSelesai && <button className="btn kecil" style={{ marginTop: 6 }} onClick={() => pindah('papan')}><PartyPopper size={14} style={{ verticalAlign: '-2px' }} /> Buka Produksi</button>}
+            : d.wajibSelesai ? `Tinggal ${semua.length - nSelesai} langkah lagi supaya angka kas, gaji, dan omset lengkap. Kerjakan pelan-pelan, satu per satu.`
+            : `Selesaikan Tahap 1 (${d.wajib.filter(l => l.selesai).length}/${d.wajib.length}) dulu. Setelah itu pemasukan unit bisa mulai dicatat.`}</p>
+          {d.wajibSelesai && <button className="btn kecil" style={{ marginTop: 6 }} onClick={() => pindah('pemasukan')}><PartyPopper size={14} style={{ verticalAlign: '-2px' }} /> Buka Pemasukan</button>}
         </div>
       </div>
 
@@ -141,17 +142,17 @@ export default function Mulai({ status: d, studioId, muat, pindah, bukaUnit }) {
 
       {d.lingkup && <>
         <h3 className="judul-bagian" style={{ marginTop: 28 }}>Pengaturan circle ({d.lingkup.filter(l => l.selesai).length}/{d.lingkup.length})</h3>
-        <p className="redup kecil" style={{ marginTop: 0, marginBottom: 10 }}>Berlaku untuk seluruh circle ini. {d.superAdmin ? 'Kamu Super Admin, jadi semuanya bisa kamu isi.' : 'Item bertanda Super Admin hanya bisa diisi Super Admin — minta tolong bila belum terisi.'}{d.pengingatAktif ? '' : ' Pengingat Telegram belum dinyalakan di server (OTOMASI_AKTIF).'}</p>
+        <p className="redup kecil" style={{ marginTop: 0, marginBottom: 10 }}>Berlaku untuk seluruh circle ini. {d.superAdmin ? 'Kamu Super Admin, jadi semuanya bisa kamu isi.' : 'Item bertanda Super Admin hanya bisa diisi Super Admin — minta tolong bila belum terisi.'}</p>
         <div className="daftar-langkah">{d.lingkup.map((l, i) => <Baris key={l.kunci} l={l} i={i + 1} pindah={pindah} />)}</div>
 
         <h3 className="judul-bagian" style={{ marginTop: 28 }}>Kesiapan semua unit ({d.unitSiap.filter(u => u.siap).length}/{d.unitSiap.length} siap)</h3>
         <div className="panel" style={{ overflowX: 'auto' }}>
-          <table><thead><tr><th>Unit</th><th>Tim terkonfirmasi</th><th>Akun jualan</th><th>Alur</th><th>Target bulan ini</th><th /></tr></thead><tbody>
+          <table><thead><tr><th>Unit</th><th>Anggota</th><th>Akun jualan</th><th>Saldo awal kas</th><th>Target bulan ini</th><th /></tr></thead><tbody>
             {d.unitSiap.map(u => <tr key={u.studioId}>
               <td><b>{u.nama}</b> {u.siap ? <span className="lencana jenis-SELESAI">siap</span> : <span className="lencana revisi">belum siap</span>}</td>
-              <td className={u.anggota > 0 && u.timOk >= u.anggota ? '' : 'nada-bad'}>{u.timOk}/{u.anggota}</td>
+              <td>{u.anggota}</td>
               <td className={u.akun > 0 ? '' : 'nada-bad'}>{u.akun > 0 ? `${u.akun} akun` : 'belum ada'}</td>
-              <td className={u.alur ? '' : 'nada-bad'}>{u.alur ? '✓' : 'belum'}</td>
+              <td className={u.kasSiap ? '' : 'redup'}>{u.kasSiap ? '✓' : 'belum'}</td>
               <td className={u.target ? '' : 'redup'}>{u.target ? '✓' : '—'}</td>
               <td><button className="btn kecil" onClick={() => bukaUnit(u.studioId, 'mulai')}>Buka unit</button></td></tr>)}</tbody></table>
         </div>
