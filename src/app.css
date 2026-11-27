@@ -408,3 +408,4 @@ input:focus, select:focus, textarea:focus { border-color: var(--line); outline: 
 .ds-tabel select { min-width: 96px; }
 @media (max-width: 760px) { .ds-tabel { min-width: 0 !important; } .ds-tabel select, .ds-tabel input[type="date"] { max-width: 60%; } }
 @media (max-width: 760px) { .ds-tabel .ds-isi { text-align: right; min-width: 0; } .ds-tabel .ds-isi > select, .ds-tabel .ds-isi > input { max-width: 100%; } .ds-tabel .ds-isi .ds-jalur { margin-left: auto; } }
+.ds-rumus { display: flex; flex-direction: column; gap: 8px; font-size: 13.5px; line-height: 1.5; }
