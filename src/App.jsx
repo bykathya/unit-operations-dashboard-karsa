@@ -24,6 +24,8 @@ import TimKartu from './TimKartu'
 import ProfilSaya from './ProfilSaya'
 import ArusKas from './ArusKas'
 import InfoKalender from './InfoKalender'
+import Manifest from './Manifest'
+import Sop from './Sop'
 import DailySheet from './DailySheet' // menggantikan Pemasukan (27 Nov 2026); Pemasukan.jsx disimpan
 import Ltk from './Ltk' // menu LTK disembunyikan 10 Nov 2026 (masukan tim: yang dicatat hanya order deal; lempar ada di produksi). Fitur & data utuh — kembalikan dengan menambah ['ltk', 'Lempar-Terima (LTK)'] ke daftar tab
 import Beranda from './Beranda'
@@ -136,7 +138,7 @@ export default function App() {
   // Tahap 6: layar Tim lama (atur fungsi artist/marketer/PM) diganti kartu Tim + Profil saya untuk semua anggota.
   // Tahap 5: Keuangan dan Biaya & Kas diganti Arus Kas (Tutup bulan tetap ada untuk saldo awal rekening & tutup buku).
   const TAB_DISEMBUNYIKAN = ['penugasan', 'klien', 'updateklien', 'diskusi', 'marketing', 'tagihan', 'hadir', 'papan', 'tugas', 'laporan', 'alur', 'setoran', 'pembayaran', 'keuangan', 'kas', 'tim']
-  const daftarTab = [...daftarTab1.filter(([k]) => lihatSaja || k !== 'updateklien'), ...(saya?.atasan ? [['manajemen', 'Manajemen']] : []), ['slip', 'Slip saya'], ['kru', 'Tim'], ['profil', 'Profil saya'], tabDiskusi]
+  const daftarTab = [...daftarTab1.filter(([k]) => lihatSaja || k !== 'updateklien'), ...(saya?.atasan ? [['manajemen', 'Manajemen']] : []), ['slip', 'Slip saya'], ['kru', 'Tim'], ['manifest', 'Manifest'], ['sop', 'SOP & Aturan'], ['profil', 'Profil saya'], tabDiskusi]
     .filter(([k]) => !TAB_DISEMBUNYIKAN.includes(k))
   const tabAktif = daftarTab.some(([k]) => k === tab) ? tab : daftarTab[0][0]
   const perCircle = Object.entries((saya?.studios ?? []).reduce((a, s) => { const k = s.circle?.nama ?? s.rumahUsaha?.nama ?? s.induk?.nama ?? 'Lainnya'; (a[k] ??= []).push(s); return a }, {}))
@@ -204,6 +206,8 @@ export default function App() {
         {studioId && tabAktif === 'updateklien' && <UpdateKlien key={studioId} studioId={studioId} />}
         {studioId && tabAktif === 'klien' && <Klien studioId={studioId} />}
         {studioId && tabAktif === 'info' && <InfoKalender key={studioId} />}
+        {studioId && tabAktif === 'manifest' && <Manifest key={studioId} studioId={studioId} namaStudio={studio?.nama?.trim()} namaSaya={user?.nama} />}
+        {studioId && tabAktif === 'sop' && <Sop key={studioId} studioId={studioId} />}
         {studioId && tabAktif === 'pemasukan' && <DailySheet key={studioId} studioId={studioId} lingkup={lingkup} pindah={setTab} />}
         {studioId && tabAktif === 'arus' && <ArusKas key={studioId} studioId={studioId} />}
         {studioId && tabAktif === 'freelancer' && <Freelancer studioId={studioId} lingkup={lingkup} />}
