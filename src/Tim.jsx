@@ -9,7 +9,7 @@ const FUNGSI = [
   { k: 'ADMIN', l: 'Admin', t: 'Administrasi keuangan/operasional (bukan pemasaran)' },
 ]
 const BIDANG = ['3D', 'Rigging', 'Animasi', 'Ilustrasi', 'GFS', 'Desain']
-const JENJANG = { KOORDINATOR: 'Koordinator', KADER: 'Kader', KARYAWAN: 'Karyawan', MAGANG: 'Magang' }
+const JENJANG = { KOORDINATOR: 'Koordinator', KADER: 'Kader', KARYAWAN: 'Talent', MAGANG: 'Magang' }
 
 // Layar Tim (koordinator ke atas): konfirmasi siapa artist / marketer / PM-QC / admin. Tebakan dari posisi sudah terisi.
 function Baris({ a, studioId, onSimpan, bisaUbah }) {
