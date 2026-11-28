@@ -32,7 +32,7 @@ export default function ProfilSaya() {
       <p className="sub" style={{ marginTop: 0 }}>WhatsApp dan bio diisi sendiri. Data kerja lainnya dan dokumen diisi koordinator di web pusat; di sini kamu hanya melihatnya.</p>
       <div className="pf-dua">
         <form className="kartu pf-form" onSubmit={simpan}>
-          <div className="orang" style={{ gap: 14 }}><span className="pf-foto"><Stiker nama={r.nama} ukuran={72} alt="" /></span><div><b style={{ fontFamily: 'var(--font-judul)', fontSize: 18 }}>{r.nama}</b><small>{r.email}</small></div></div>
+          <div className="orang" style={{ gap: 14 }}><span className="pf-foto"><Stiker nama={r.nama} ukuran={72} alt="" foto={f.fotoUrl || r.foto} /></span><div><b style={{ fontFamily: 'var(--font-judul)', fontSize: 18 }}>{r.nama}</b><small>{r.email}</small></div></div>
           <h2 style={{ margin: '18px 0 10px', fontSize: 18 }}>Data diri &amp; bio</h2>
           <div className="dua">
             <label style={{ gridColumn: '1 / -1' }}>Nomor WhatsApp<input type="tel" inputMode="tel" value={f.nomorWa} onChange={ubah('nomorWa')} maxLength={30} placeholder="08…" /><small className="redup">Otomatis masuk ke data HR, supaya koordinator bisa menghubungimu</small></label>

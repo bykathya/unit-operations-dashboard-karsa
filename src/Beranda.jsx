@@ -29,7 +29,7 @@ export default function Beranda({ studioId, pindah, onOrder, bisa = () => true }
     <div>
       <div className="sapaan">
         <div><h2>{d.sapaan}, {d.nama.split(' ')[0]}</h2><div className="redup">{tgl}</div></div>
-        <Stiker nama={d.nama} ukuran={140} />
+        <Stiker nama={d.nama} ukuran={140} foto={d.foto} />
       </div>
       {perhatian.length > 0 ? (
         <div className="panel"><h3 className="judul-bagian">Perlu perhatian</h3>

@@ -24,7 +24,7 @@ export default function Manifest({ studioId, namaStudio, namaSaya }) {
       <p className="sub" style={{ marginTop: 0 }}>Tuliskan doa baik, rasa syukur, dan harapanmu bulan ini. Bisa diubah sampai <b>{tglPanjang(d.batas)}</b>, setelah itu terkunci.</p>
       {galat && <div className="galat">{galat}</div>}
       <div className="kartu" style={{ padding: 22 }}>
-        <div className="orang"><Stiker nama={namaSaya} ukuran={40} /><b>Manifestasiku{namaSaya ? ` · ${namaSaya}` : ''}</b>{punya && !ubah && <button type="button" className="tombol k" style={{ marginLeft: 'auto' }} onClick={() => setUbah(true)}>Ubah</button>}</div>
+        <div className="orang"><Stiker nama={namaSaya} ukuran={40} foto={d.saya.foto} /><b>Manifestasiku{namaSaya ? ` · ${namaSaya}` : ''}</b>{punya && !ubah && <button type="button" className="tombol k" style={{ marginLeft: 'auto' }} onClick={() => setUbah(true)}>Ubah</button>}</div>
         {punya && !ubah ? <p style={{ whiteSpace: 'pre-wrap', margin: '12px 0 0', lineHeight: 1.6 }}>{punya}</p> : (
           <form onSubmit={kirim}>
             <textarea className="mf-tulis" value={teks} onChange={e => setTeks(e.target.value)} required maxLength={3000} rows={7} placeholder="Alhamdulillah… Aku yakin dan percaya bulan ini…" />
@@ -37,7 +37,7 @@ export default function Manifest({ studioId, namaStudio, namaSaya }) {
         {d.tim.length === 0 && <p className="kosong">Belum ada anggota lain di studio ini.</p>}
         {d.tim.map(t => (
           <div key={t.id} className={t.isi ? 'ada' : ''}>
-            <div className="orang"><Stiker nama={t.nama} ukuran={36} /><b>{t.nama}</b></div>
+            <div className="orang"><Stiker nama={t.nama} ukuran={36} foto={t.foto} /><b>{t.nama}</b></div>
             <p className={t.isi ? '' : 'kosong'}>{t.isi ?? 'Belum menulis.'}</p>
           </div>
         ))}
