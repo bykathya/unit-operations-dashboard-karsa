@@ -8,7 +8,9 @@ export function nomorKarakter(nama) {
   return (h % JUMLAH) + 1
 }
 
-export default function Stiker({ nama, nomor, ukuran = 150, alt }) {
+// foto = foto profil orang itu (28 Nov 2026): bila ada, dipakai menggantikan karakter.
+export default function Stiker({ nama, nomor, ukuran = 150, alt, foto }) {
+  if (foto) return <img className="stiker foto" src={foto} width={ukuran} height={ukuran} alt={alt ?? ''} loading="lazy" referrerPolicy="no-referrer" style={{ objectFit: 'cover', borderRadius: '50%' }} />
   const n = nomor ?? nomorKarakter(nama)
   return <img className="stiker" src={`/maskot/stiker-${n}.webp`} width={ukuran} height={ukuran} alt={alt ?? ''} loading="lazy" />
 }
