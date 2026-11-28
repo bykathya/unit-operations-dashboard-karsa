@@ -24,6 +24,7 @@ import TimKartu from './TimKartu'
 import ProfilSaya from './ProfilSaya'
 import ArusKas from './ArusKas'
 import InfoKalender from './InfoKalender'
+import CariMenu, { TombolCari, TombolPasang } from './CariMenu'
 import Manifest from './Manifest'
 import Sop from './Sop'
 import DailySheet from './DailySheet' // menggantikan Pemasukan (27 Nov 2026); Pemasukan.jsx disimpan
@@ -58,6 +59,7 @@ export default function App() {
   const [tab, setTab] = useState('beranda')
   const [galat, setGalat] = useState('')
   const [menu, setMenu] = useState(false)
+  const [cari, setCari] = useState(false) // Cari menu Ctrl K (28 Nov 2026)
   const [mulai, setMulai] = useState(null)
   const [belumDibaca, setBelumDibaca] = useState(0)
   const [identitas, setIdentitas] = useState(null)
@@ -158,9 +160,11 @@ export default function App() {
             {perCircle.map(([c, daftar]) => <optgroup key={c} label={c}>{daftar.map(s => <option key={s.id} value={s.id}>{s.nama.trim()}</option>)}</optgroup>)}
           </select>
         </label>
+        <TombolCari onBuka={() => { setCari(true); setMenu(false) }} />
         <MenuSisi daftar={daftarTab} aktif={tabAktif} pilih={k => { setTab(k); setMenu(false) }} />
         <div className="spasi" />
         <div className="sisi-bawah">
+          <TombolPasang />
           {saya?.superAdmin && !menyamar && <button className="btn kecil" onClick={() => setBukaMenyamar(true)} title="Lihat web ini sebagai orang lain (tercatat)"><UserRound size={14} aria-hidden="true" /> Masuk sebagai…</button>}
           <div className="profil-sisi">
             <span className="avatar" aria-hidden="true">{(user.nama ?? '?').trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toUpperCase()}</span>
@@ -170,6 +174,7 @@ export default function App() {
           </div>
         </div>
       </aside>
+      <CariMenu daftar={daftarTab} pilih={setTab} buka={cari} setBuka={setCari} />
       {bukaMenyamar && <div className="modal-latar" onClick={() => setBukaMenyamar(false)}><div className="modal lebar" onClick={e => e.stopPropagation()}><div className="baris-atas"><h3 style={{ margin: 0 }}>Masuk sebagai</h3><button className="btn kecil" onClick={() => setBukaMenyamar(false)}>Tutup</button></div><Menyamar onMulai={mulaiSebagai} /></div></div>}
       <div className="isi">
       <main>
@@ -177,7 +182,7 @@ export default function App() {
         {lihatSaja && <div className="panel" style={{ borderLeft: '4px solid var(--accent)', marginBottom: 12 }}><b>Mode lihat — pemilik unit.</b> <span className="redup">Kamu bisa melihat proses & keuangan {studio?.nama?.trim()}, tetapi tidak bisa mengisi atau mengubah apa pun. Perubahan dilakukan koordinator unit.</span></div>}
         {galat && <div className="galat blok">{galat}</div>}
         {saya && saya.studios.length === 0 && <div className="kosong">Akunmu belum terhubung ke studio mana pun. Hubungi koordinator unitmu.</div>}
-        {studioId && tabAktif === 'mulai' && (mulai ? <Mulai status={mulai} studioId={studioId} muat={muatMulai} pindah={setTab} bukaUnit={(id, tab) => { setStudioId(id); setTab(tab) }} /> : <div className="redup">Memuat…</div>)}
+        {studioId && tabAktif === 'mulai' && (mulai ? <Mulai status={mulai} studioId={studioId} muat={muatMulai} pindah={setTab} bukaUnit={(id, tab) => { setStudioId(id); setTab(tab) }} daftar={daftarTab} /> : <div className="redup">Memuat…</div>)}
         {studioId && tabAktif === 'kas' && <KasBiaya unit={(saya?.studios ?? []).filter(s => s.mode === 'kelola')} superAdmin={!!saya?.superAdmin} unitAwal={studioId} />}
         {studioId && tabAktif === 'buku' && <BukuBesar unit={(saya?.studios ?? []).filter(s => s.mode === 'kelola')} superAdmin={!!saya?.superAdmin} unitAwal={studioId} />}
         {studioId && tabAktif === 'penugasan' && <Penugasan unit={(saya?.studios ?? []).filter(s => s.mode === 'kelola')} />}

@@ -104,7 +104,7 @@ function MulaiPribadi({ d, pindah }) {
   )
 }
 
-export default function Mulai({ status: d, studioId, muat, pindah, bukaUnit }) {
+export default function Mulai({ status: d, studioId, muat, pindah, bukaUnit, daftar = [] }) {
   const [galat, setGalat] = useState('')
   useEffect(() => { muat() }, []) // eslint-disable-line react-hooks/exhaustive-deps -- segarkan centang setiap kali halaman dibuka
   const tandaiAlur = async (setuju) => { setGalat(''); try { await api('/api/circle/mulai/alur', { method: 'POST', body: { studioId, setuju } }); await muat() } catch (e) { setGalat(e.message) } }
@@ -157,6 +157,37 @@ export default function Mulai({ status: d, studioId, muat, pindah, bukaUnit }) {
               <td><button className="btn kecil" onClick={() => bukaUnit(u.studioId, 'mulai')}>Buka unit</button></td></tr>)}</tbody></table>
         </div>
       </>}
+
+      <PanduanMenu daftar={daftar} pindah={pindah} />
     </div>
+  )
+}
+
+// Panduan menu sesuai peran (Karsa, 28 Nov 2026): hanya menu yang memang ada di sidebar orang ini.
+const ARTI_MENU = {
+  beranda: 'Ringkasan hari ini dan pintasan.', info: 'Pengumuman, event, kontrak, dokumen, dan kalender acara.',
+  pemasukan: 'Daily Sheet: catat chat masuk & order, ubah status (WIP/Revisi/Waitlist/Done), tandai Lunas, lempar kerjaan, freelancer, target, bonus, dan lembur.',
+  akun: 'Daftar akun jualan studio (VGen, Ko-fi, Artistree, dll.).', gaji: 'Siapkan dan finalkan slip gaji tim. Bonus & komisi dari Daily Sheet masuk ke sini.',
+  slip: 'Slip gaji milikmu.', kru: 'Kartu anggota tim studio.', manifest: 'Tulis manifestasimu bulan ini; terkunci tanggal 1 bulan berikutnya.',
+  sop: 'Panduan kerja dan aturan studio. Koordinator yang menulis.', profil: 'Isi WhatsApp & bio sendiri; lihat data kerja dan status dokumenmu.',
+  tugas: 'Pekerjaan yang sedang menjadi giliranmu.', diskusi: 'Ruang obrolan studio.', arus: 'Arus kas studio.', bayarfreelance: 'Catat pembayaran ke freelancer.',
+  freelancer: 'Database freelancer.', mulai: 'Halaman ini.',
+}
+function PanduanMenu({ daftar, pindah }) {
+  const isi = daftar.filter(([k]) => k !== 'mulai' && ARTI_MENU[k])
+  if (!isi.length) return null
+  return (
+    <>
+      <h3 className="judul-bagian" style={{ marginTop: 28 }}>Menu untukmu</h3>
+      <p className="redup kecil" style={{ marginTop: 0 }}>Tekan <kbd>Ctrl</kbd> + <kbd>K</kbd> kapan saja untuk mencari menu. Web ini juga bisa dipasang seperti aplikasi lewat tombol Install App di bawah menu kiri.</p>
+      <div className="daftar-langkah">
+        {isi.map(([k, label]) => (
+          <div key={k} className="langkah" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <div style={{ flex: 1, minWidth: 0 }}><b>{String(label).replace(/\s*[●•]\s*$/, '')}</b><div className="redup kecil">{ARTI_MENU[k]}</div></div>
+            <button className="btn kecil" onClick={() => pindah(k)}>Buka</button>
+          </div>
+        ))}
+      </div>
+    </>
   )
 }
