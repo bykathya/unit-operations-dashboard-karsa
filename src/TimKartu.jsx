@@ -8,8 +8,9 @@ const STATUS = { JOMBLO: 'Jomblo', TAKEN: 'Taken', RAHASIA: 'Rahasia 🤫' }
 
 function Foto({ a, besar }) {
   const ukuran = besar ? 160 : 120
-  return a.fotoUrl
-    ? <img src={a.fotoUrl} alt={`Foto ${a.nama}`} referrerPolicy="no-referrer" style={{ width: '100%', aspectRatio: '3 / 4', objectFit: 'cover', display: 'block', borderBottom: '1.5px solid var(--line)' }} />
+  const [rusak, setRusak] = useState('') // tautan foto yang gagal dimuat → tampil karakter (28 Nov 2026)
+  return a.fotoUrl && rusak !== a.fotoUrl
+    ? <img src={a.fotoUrl} alt={`Foto ${a.nama}`} referrerPolicy="no-referrer" onError={() => setRusak(a.fotoUrl)} style={{ width: '100%', aspectRatio: '3 / 4', objectFit: 'cover', display: 'block', borderBottom: '1.5px solid var(--line)' }} />
     : <div style={{ aspectRatio: '3 / 4', display: 'grid', placeItems: 'center', background: 'var(--pink-candy)', borderBottom: '1.5px solid var(--line)' }}><Stiker nama={a.nama} ukuran={ukuran} alt="" /></div>
 }
 

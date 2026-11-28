@@ -32,11 +32,11 @@ export default function ProfilSaya() {
       <p className="sub" style={{ marginTop: 0 }}>WhatsApp dan bio diisi sendiri. Data kerja lainnya dan dokumen diisi koordinator di web pusat; di sini kamu hanya melihatnya.</p>
       <div className="pf-dua">
         <form className="kartu pf-form" onSubmit={simpan}>
-          <div className="orang" style={{ gap: 14 }}><span className="pf-foto"><Stiker nama={r.nama} ukuran={72} alt="" foto={f.fotoUrl || r.foto} /></span><div><b style={{ fontFamily: 'var(--font-judul)', fontSize: 18 }}>{r.nama}</b><small>{r.email}</small></div></div>
+          <div className="orang" style={{ gap: 14 }}><span className="pf-foto"><Stiker nama={r.nama} ukuran={72} alt="" foto={f.fotoUrl} cadangan={r.foto} /></span><div><b style={{ fontFamily: 'var(--font-judul)', fontSize: 18 }}>{r.nama}</b><small>{r.email}</small></div></div>
           <h2 style={{ margin: '18px 0 10px', fontSize: 18 }}>Data diri &amp; bio</h2>
           <div className="dua">
             <label style={{ gridColumn: '1 / -1' }}>Nomor WhatsApp<input type="tel" inputMode="tel" value={f.nomorWa} onChange={ubah('nomorWa')} maxLength={30} placeholder="08…" /><small className="redup">Otomatis masuk ke data HR, supaya koordinator bisa menghubungimu</small></label>
-            <label style={{ gridColumn: '1 / -1' }}>Tautan foto (opsional)<input type="url" value={f.fotoUrl} onChange={ubah('fotoUrl')} placeholder="https://… (mis. dari Google Drive atau Instagram)" maxLength={500} /></label>
+            <label style={{ gridColumn: '1 / -1' }}>Tautan foto (opsional)<input type="url" value={f.fotoUrl} onChange={ubah('fotoUrl')} placeholder="https://drive.google.com/… atau link gambar .jpg/.png" maxLength={500} /><small className="redup">Link Google Drive harus dibagikan ke "Siapa saja yang memiliki link". Link profil Instagram tidak bisa dipakai.</small></label>
             <label style={{ gridColumn: '1 / -1' }}>Bio<textarea rows={3} value={f.bio} onChange={ubah('bio')} maxLength={300} placeholder="Ceritakan dirimu dalam 1–2 kalimat" /></label>
             <label>Keahlian<input value={f.keahlian} onChange={ubah('keahlian')} maxLength={200} placeholder="mis. chat klien, admin VGen" /></label>
             <label>Paling aktif<input value={f.jamAktif} onChange={ubah('jamAktif')} maxLength={60} placeholder="mis. malam, 20.00–02.00" /></label>
