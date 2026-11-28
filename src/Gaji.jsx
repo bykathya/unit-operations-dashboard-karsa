@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { api } from './api'
 import { InputRupiah } from './Pilihan'
 import { cetakSlip, cetakBanyak } from './slipPdf'
+import { webPusat } from './api-util'
 
 // PENGGAJIAN (10 Nov 2026): koordinator memecah THP Bio menjadi RINCIAN TETAP sekali, lalu tiap bulan "Siapkan slip" (gaji pokok + komponen tetap + lembur presensi otomatis),
 // menambah bonus/komisi/potongan/baris tambahan, Final → Dibayar, dan mengunduh slip PDF. Angka bulan lalu tidak diketik ulang.
@@ -16,7 +17,7 @@ function Rincian({ b, studioId, onTutup, onSimpan }) {
   return (
     <div className="panel" style={{ marginTop: 8 }}>
       <b>Rincian gaji tetap — {b.nama}</b>
-      <div className="redup kecil">THP di Bio studio: <b>{rp(b.thpBio)}</b>. Pecah jadi komponen; sisanya otomatis menjadi gaji pokok. Total tetap sama dengan THP Bio.</div>
+      <div className="redup kecil">THP dari Financial Forecasting: <b>{rp(b.thpBio)}</b>. Pecah jadi komponen; sisanya otomatis menjadi gaji pokok. Total tetap sama dengan THP ini.</div>
       {galat && <div className="galat blok">{galat}</div>}
       {k.map((x, i) => (
         <div className="chips" key={i} style={{ marginTop: 6 }}>
@@ -82,7 +83,7 @@ export default function Gaji({ studioId }) {
   const p = d?.peringatan, r = d?.ringkas
   return (
     <div>
-      <div className="redup kecil" style={{ marginBottom: 8 }}>Gaji dikelola di sini oleh Koordinator. THP tiap orang diambil dari Bio studio (Management Dashboard) — di sini dipecah jadi rincian, tidak perlu diketik ulang tiap bulan. Management Dashboard hanya untuk pemantauan.</div>
+      <div className="redup kecil" style={{ marginBottom: 8 }}>Gaji dikelola di sini oleh Koordinator. THP tiap orang diambil dari Financial Forecasting di web pusat (pos Gaji, Makan, Transport, Komunikasi). Bonus, komisi, dan lembur ditambahkan otomatis di slip. Di sini THP bisa dipecah jadi rincian, tidak perlu diketik ulang tiap bulan.</div>
       <div className="toolbar">
         <select value={bulan} onChange={e => setBulan(Number(e.target.value))}>{NAMA_BLN.map((n, i) => <option key={i} value={i + 1}>{n}</option>)}</select>
         <select value={tahun} onChange={e => setTahun(Number(e.target.value))}>{[0, 1, 2].map(i => <option key={i} value={skrg.getUTCFullYear() - i}>{skrg.getUTCFullYear() - i}</option>)}</select>
@@ -91,7 +92,7 @@ export default function Gaji({ studioId }) {
       </div>
       {galat && <div className="galat blok">{galat}</div>}
       {ok && <div className="ok blok">{ok}</div>}
-      {p?.tanpaThp.length > 0 && <div className="nada-warn kecil">THP belum diisi di Bio studio: {p.tanpaThp.join(', ')}.</div>}
+      {p?.tanpaThp.length > 0 && <div className="nada-warn kecil">THP belum diisi di Financial Forecasting: {p.tanpaThp.join(', ')}. <a href={webPusat('financial-forecasting')} target="_blank" rel="noreferrer">Isi di web pusat ↗</a></div>}
       {p?.rincianMelebihi.length > 0 && <div className="nada-warn kecil">Rincian melebihi THP: {p.rincianMelebihi.join(', ')} — perbaiki rincian.</div>}
       {p?.perluSegarkan.length > 0 && <div className="nada-warn kecil">Slip draft berbeda dari Bio/rincian terbaru ({p.perluSegarkan.join(', ')}) — klik "Siapkan slip" untuk menyegarkan.</div>}
       {p?.lemburMenunggu > 0 && <div className="nada-warn kecil">{p.lemburMenunggu} lembur sampai bulan ini masih menunggu persetujuan (Tugas saya › Lembur). Setujui sebelum Final supaya ikut slip ini — yang disetujui sesudah Final masuk slip bulan berikutnya sebagai susulan.</div>}
