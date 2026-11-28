@@ -19,3 +19,9 @@ export async function unduhXlsx(nama, baris, sheet = 'Data') {
   const data = baris.map((r, i) => r.map(v => (v == null || v === '' ? null : i === 0 ? { value: String(v), fontWeight: 'bold' } : typeof v === 'number' || typeof v === 'boolean' ? v : String(v))))
   await tulis(data, { sheet, columns: (baris[0] ?? []).map((_, i) => ({ width: i === 0 ? 34 : 16 })) }).toFile(nama.endsWith('.xlsx') ? nama : nama + '.xlsx')
 }
+
+// Alamat web pusat (28 Nov 2026): diturunkan dari alamat web kerja (kerja.domain → pusat.domain), tanpa domain tertulis di kode.
+export function webPusat(jalur = '') {
+  const h = window.location.hostname.split('.')
+  return h.length > 2 ? `https://${['pusat', ...h.slice(1)].join('.')}/${jalur}` : `/${jalur}`
+}

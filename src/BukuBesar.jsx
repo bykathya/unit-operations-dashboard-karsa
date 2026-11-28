@@ -1,7 +1,7 @@
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { api } from './api'
 import TombolUnduh from './TombolUnduh'
-import { unduhCsv, NAMA_BULAN, bulanSekarang, geserBulan, hariIniLokal } from './api-util'
+import { unduhCsv, NAMA_BULAN, bulanSekarang, geserBulan, hariIniLokal, webPusat } from './api-util'
 import PilihRekening from './PilihRekening'
 import { InputAngka } from './Pilihan'
 
@@ -213,19 +213,19 @@ export function ItemTetap({ studioId, p }) {
         <tbody><tr><td colSpan={rek.length > 0 ? 3 : 2}><b>Total biaya rutin (diisi di circle)</b></td><td className="kanan"><b>{rp(d.item.filter(i => !i.diabaikan).reduce((a, i) => a + i.jumlahBulanIni, 0))}</b></td><td /></tr></tbody></table>}
       {(d.gajiBio?.orang.length > 0 || d.gajiBio?.shu > 0) && <div className="panel" style={{ marginTop: 12 }}>
         <h3 className="judul-bagian">Gaji, Dignity & SHU dari Bio studio · {rp(d.gajiBio.orang.reduce((a, o) => a + o.jumlah, 0) + d.gajiBio.shu)}/bulan</h3>
-        <div className="redup kecil">Gaji = THP di Bio studio (orang aktif). Bila slip Penggajian bulan ini sudah dibuat, angka slip yang dipakai (sudah termasuk bonus, lembur & potongan). SHU = total SHU di Bio. Otomatis ikut Tutup bulan — tidak perlu diketik di tabel atas.</div>
+        <div className="redup kecil">Gaji = THP dari Financial Forecasting (pos Gaji, Makan, Transport, Komunikasi; orang aktif). Bila belum ada di FF, dipakai THP lama di Bio studio. Bila slip Penggajian bulan ini sudah dibuat, angka slip yang dipakai (sudah termasuk bonus, lembur & potongan). SHU = total SHU di Bio. Otomatis ikut Tutup bulan — tidak perlu diketik di tabel atas.</div>
         {/* Per kelompok (12 Nov 2026, masukan tim): Gaji · Dignity · SHU, masing-masing dengan subtotal */}
         <table>{[['Gaji', d.gajiBio.orang.filter(o => !o.dignity)], ['Dignity', d.gajiBio.orang.filter(o => o.dignity)]].filter(([, l]) => l.length).map(([judul, l]) => <tbody key={judul}>
           <tr className="baris-kelompok"><td><b>{judul}</b> <span className="redup kecil">· {l.length} orang</span></td><td className="kanan"><b>{rp(l.reduce((a, o) => a + o.jumlah, 0))}</b></td></tr>
           {l.map(o => <tr key={o.userId}><td>{o.nama}{o.dari === 'slip' && <span className="redup kecil"> · slip {o.status === 'DRAFT' ? 'draft' : o.status === 'FINAL' ? 'final' : 'dibayar'}</span>}</td><td className="kanan">{rp(o.jumlah)}</td></tr>)}
         </tbody>)}
           {d.gajiBio.shu > 0 && <tbody><tr className="baris-kelompok"><td><b>SHU</b> <span className="redup kecil">· total SHU di Bio</span></td><td className="kanan"><b>{rp(d.gajiBio.shu)}</b></td></tr></tbody>}</table>
-        <a className="kecil" href={`https://app.domain-anda.com/unit-usaha?autoStudio=${studioId}`} target="_blank" rel="noreferrer">Ubah THP / SHU di Bio studio ↗</a></div>}
+        <a className="kecil" href={webPusat('financial-forecasting')} target="_blank" rel="noreferrer">Ubah THP di Financial Forecasting ↗</a> · <a className="kecil" href={webPusat(`unit-usaha?autoStudio=${studioId}`)} target="_blank" rel="noreferrer">Ubah SHU di Bio studio ↗</a></div>}
       {d.dariBio?.length > 0 && <div className="panel" style={{ marginTop: 12 }}>
         <h3 className="judul-bagian">Dari Bio studio · {rp(d.dariBio.filter(x => !x.dobel).reduce((a, x) => a + x.jumlah, 0))}/bulan</h3>
         <div className="redup kecil">Langganan, iuran, kontribusi & coworking diisi <b>sekali</b> di Bio studio (Management Dashboard → Unit Usaha → Bio Studio → Pengeluaran Rutin) lalu otomatis ikut dihitung di sini — tidak perlu diketik lagi sebagai biaya rutin. Gaji, SHU, Dignity & uang saku tetap diisi di tabel di atas.</div>
         <table><tbody>{d.dariBio.map(x => <tr key={x.id} className={x.dobel ? 'redup' : ''}><td>{x.nama}<span className="redup kecil"> · {x.jenis}</span>{x.dobel && <span className="nada-warn kecil"> · sama dengan item di atas, tidak dihitung dobel — hapus salah satunya</span>}</td><td className="kanan">{rp(x.jumlah)}</td></tr>)}</tbody></table>
-        <a className="kecil" href={`https://app.domain-anda.com/unit-usaha?autoStudio=${studioId}`} target="_blank" rel="noreferrer">Ubah di Bio studio ↗</a></div>}
+        <a className="kecil" href={webPusat(`unit-usaha?autoStudio=${studioId}`)} target="_blank" rel="noreferrer">Ubah di Bio studio ↗</a></div>}
       {d.bisaBuatGlobal && <p className="redup kecil" style={{ marginTop: 6 }}>Butuh kategori baru (mis. Dignity)? Tambahkan di tab <b>Atur kategori</b> sebagai pengeluaran bersifat <b>tetap</b>, lalu pilih saat menambah biaya rutin.</p>}
       {d.bisaBuat && (
         <form className="toolbar" style={{ marginTop: 12 }} onSubmit={e => { e.preventDefault(); jalankan(async () => { await api('/api/circle/buku/item-tetap', { method: 'POST', body: { studioId: f.global ? undefined : studioId, kategoriId: f.kategoriId, nama: f.nama, jumlahBawaan: Number(f.jumlahBawaan || 0), rekeningId: f.global ? undefined : f.rekeningId } }); setF({ ...f, nama: '', jumlahBawaan: '' }) }, setGalat, muat) }}>
