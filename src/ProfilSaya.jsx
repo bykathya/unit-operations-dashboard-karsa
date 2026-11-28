@@ -62,6 +62,7 @@ export default function ProfilSaya() {
             <div className="pf-dok">{DOK.map(([j, l]) => <div key={j} className={d.dokumen?.[j] ? 'ada' : ''}><span>{l}</span><b>{d.dokumen?.[j] ? '✓ Ada' : 'Belum'}</b></div>)}</div>
             <p className="arti" style={{ marginTop: 10 }}>Kirim dokumen yang belum ada ke koordinatormu. Koordinator yang mengunggahnya di web pusat.</p>
           </div>
+          <GantiPassword />
         </div>
       </div>
     </div>
@@ -69,3 +70,35 @@ export default function ProfilSaya() {
 }
 
 const DOK = [['KTP', 'Foto KTP'], ['NDA', 'Kontrak NDA'], ['SKCK', 'SKBB / SKCK'], ['BANK', 'Buku Rekening']]
+
+// Ganti password sendiri (Karsa, 28 Nov 2026): password awal dibagikan Kepala Circle lewat chat pribadi,
+// lalu tiap anggota menggantinya di sini. Server memeriksa password lama (POST /api/circle/profil-saya/password).
+function GantiPassword() {
+  const kosong = { lama: '', baru: '', ulang: '' }
+  const [f, setF] = useState(kosong), [lihat, setLihat] = useState(false), [kirim, setKirim] = useState(false), [galat, setGalat] = useState(''), [info, setInfo] = useState('')
+  const ubah = (k) => (e) => { setF({ ...f, [k]: e.target.value }); setGalat(''); setInfo('') }
+  const simpan = async (e) => {
+    e.preventDefault()
+    if (f.baru.length < 8) return setGalat('Password baru minimal 8 karakter.')
+    if (f.baru !== f.ulang) return setGalat('Password baru dan ulangannya belum sama.')
+    if (f.baru === f.lama) return setGalat('Password baru harus berbeda dari password lama.')
+    setKirim(true)
+    try { await api('/api/circle/profil-saya/password', { method: 'POST', body: { passwordLama: f.lama, passwordBaru: f.baru } }); setF(kosong); setInfo('Password sudah diganti. Pakai password baru saat masuk berikutnya.') } catch (er) { setGalat(er.message) } finally { setKirim(false) }
+  }
+  const jenis = lihat ? 'text' : 'password'
+  return (
+    <form className="kartu pf-kanan" onSubmit={simpan}>
+      <h2>Ganti password</h2>
+      <small className="arti">Ganti password awal dengan password buatanmu sendiri. Minimal 8 karakter.</small>
+      <div className="dua" style={{ marginTop: 10 }}>
+        <label style={{ gridColumn: '1 / -1' }}>Password sekarang<input type={jenis} value={f.lama} onChange={ubah('lama')} autoComplete="current-password" required /></label>
+        <label>Password baru<input type={jenis} value={f.baru} onChange={ubah('baru')} autoComplete="new-password" minLength={8} required /></label>
+        <label>Ulangi password baru<input type={jenis} value={f.ulang} onChange={ubah('ulang')} autoComplete="new-password" minLength={8} required /></label>
+      </div>
+      <label style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, fontSize: 13, cursor: 'pointer', width: 'fit-content' }}><input type="checkbox" style={{ width: 'auto', margin: 0 }} checked={lihat} onChange={e => setLihat(e.target.checked)} /> Tampilkan password</label>
+      {galat && <div className="galat blok">{galat}</div>}
+      {info && <div role="status" className="chip" style={{ marginTop: 10 }}>{info}</div>}
+      <div className="baris" style={{ marginTop: 12 }}><button className="tombol p" disabled={kirim}>{kirim ? 'Menyimpan…' : 'Ganti password'}</button></div>
+    </form>
+  )
+}
