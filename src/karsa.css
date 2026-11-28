@@ -406,3 +406,17 @@ main { padding: 26px clamp(16px, 3vw, 44px) 52px; }
 .kd .pf-dok > div.ada { border-style: solid; background: var(--accent); color: #111; }
 .kd .pf-foto img { width: 72px !important; height: 72px !important; border: 0 !important; border-radius: 0; }
 .stiker.foto { aspect-ratio: 1 / 1; height: auto; background: var(--bg-card); }
+
+/* ═══ Halaman lama ikut desain yang disepakati (28 Nov 2026) ═══════════════════════════════════
+   Layar yang belum ditulis ulang (Progres Omset, Arus Kas, Penggajian, Tim, Akun jualan, dll.) memakai .panel, .btn, .subtab. */
+main .panel { border-radius: 26px; border: 1.5px solid var(--line); box-shadow: none; padding: 20px 22px; }
+main .judul-bagian { font-family: var(--font-judul); font-weight: 600; font-size: 18px; letter-spacing: -.01em; }
+main .btn { border-radius: 999px; border: 1.5px solid var(--line); min-height: 38px; padding: 0 16px; font-size: 14px; }
+main .btn.utama { background: var(--accent); color: #111; border-color: var(--line); box-shadow: none; }
+main .btn.kecil { min-height: 32px; padding: 0 12px; font-size: 13px; }
+main .subtab { gap: 8px; border-bottom: 0; padding-bottom: 0; }
+main .subtab button { min-height: 38px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--bg-card); color: var(--text); font-size: 14px; }
+main .subtab button.aktif { background: #111; color: var(--accent); }
+main th { font-size: 12.5px; border-bottom: 1.5px solid var(--line); }
+main td { font-size: 14.5px; padding: 11px 10px; }
+main input:not([type=checkbox]):not([type=radio]), main select, main textarea { border-radius: 14px; border: 1.5px solid var(--line); }
