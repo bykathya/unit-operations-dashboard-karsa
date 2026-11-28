@@ -154,7 +154,7 @@ export default function App() {
       </div>
       {menu && <div className="sisi-latar" onClick={() => setMenu(false)} />}
       <aside className={'sisi' + (menu ? ' buka' : '')}>
-        <div className="logo"><span>{(identitas?.nama ?? 'K')[0]}</span> {identitas?.nama ?? 'Unit Operations'}</div>
+        <div className="logo"><span>{(identitas?.nama ?? 'K')[0]}</span><div>{identitas?.nama ?? 'Unit Operations'}<small className="logo-sub">Kerja harian</small></div></div>
         <label className="sisi-studio">Unit
           <select className="pilih-studio" value={studioId ?? ''} onChange={e => { setStudioId(e.target.value); try { localStorage.setItem('circle-studio', e.target.value) } catch { /* abaikan */ } }}>
             {perCircle.map(([c, daftar]) => <optgroup key={c} label={c}>{daftar.map(s => <option key={s.id} value={s.id}>{s.nama.trim()}</option>)}</optgroup>)}
@@ -213,7 +213,7 @@ export default function App() {
         {studioId && tabAktif === 'info' && <InfoKalender key={studioId} />}
         {studioId && tabAktif === 'manifest' && <Manifest key={studioId} studioId={studioId} namaStudio={studio?.nama?.trim()} namaSaya={user?.nama} />}
         {studioId && tabAktif === 'sop' && <Sop key={studioId} studioId={studioId} />}
-        {studioId && tabAktif === 'pemasukan' && <DailySheet key={studioId} studioId={studioId} lingkup={lingkup} pindah={setTab} />}
+        {studioId && tabAktif === 'pemasukan' && <DailySheet key={studioId} studioId={studioId} lingkup={lingkup} pindah={setTab} namaStudio={studio?.nama?.trim()} />}
         {studioId && tabAktif === 'arus' && <ArusKas key={studioId} studioId={studioId} />}
         {studioId && tabAktif === 'freelancer' && <Freelancer studioId={studioId} lingkup={lingkup} />}
         {studioId && tabAktif === 'tim' && <Tim key={studioId} studioId={studioId} />}

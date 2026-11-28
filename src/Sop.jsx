@@ -20,26 +20,28 @@ export default function Sop({ studioId }) {
     try { if (form.id) await api(`/api/circle/sop/${form.id}`, { method: 'PUT', body: form }); else await api('/api/circle/sop', { method: 'POST', body: { ...form, studioId } }); setKat(form.kategori); setForm(null); await muat() } catch (er) { setGalat(er.message) }
   }
   const hapus = async (p) => { if (!window.confirm(`Hapus panduan "${p.judul}"?`)) return; try { await api(`/api/circle/sop/${p.id}`, { method: 'DELETE' }); await muat() } catch (er) { setGalat(er.message) } }
+  const judulKat = KATEGORI.find(k => k[0] === kat)?.[1]
   return (
-    <div>
-      <p className="redup" style={{ marginTop: -6 }}>Panduan kerja khusus studio <b>{d.studio}</b>. Koordinator yang menulis dan mengubah; semua anggota studio bisa membaca.</p>
+    <div className="kd">
+      <div className="baris" style={{ marginBottom: 8 }}><span className="chip">{d.daftar.length} panduan</span></div>
+      <p className="sub" style={{ marginTop: 0 }}>Panduan kerja khusus studio <b>{d.studio}</b>. Koordinator yang menulis dan mengubah; semua anggota studio bisa membaca. Studio lain punya SOP sendiri.</p>
       {galat && <div className="galat">{galat}</div>}
-      <div className="toolbar">
-        <input className="cari" placeholder="Cari SOP, VGen, NDA, QC…" value={cari} onChange={e => setCari(e.target.value)} aria-label="Cari panduan" style={{ flex: '1 1 220px' }} />
-        {d.bolehUbah ? !form && <button className="btn utama" onClick={() => setForm({ kategori: kat, judul: '', tag: '', ket: '', poin: '' })}>+ Tambah panduan</button>
-          : <span className="chip sub">Lihat saja · hanya Koordinator yang bisa mengubah</span>}
+      <div className="baris" style={{ marginBottom: 16 }}>
+        <input className="kd-cari-isi" placeholder="Cari SOP, VGen, NDA, QC…" value={cari} onChange={e => setCari(e.target.value)} aria-label="Cari panduan" />
+        {d.bolehUbah ? !form && <button type="button" className="tombol hitam" onClick={() => setForm({ kategori: kat, judul: '', tag: '', ket: '', poin: '' })}>+ Tambah Panduan</button>
+          : <span className="chip">Lihat saja · hanya Koordinator yang bisa mengubah</span>}
       </div>
       <div className="sop-kat">
         {KATEGORI.map(([k, j, ket]) => (
-          <button key={k} type="button" className={kat === k ? 'aktif' : ''} onClick={() => setKat(k)}>
-            <span style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}><b>{j}</b><span className="chip">{d.daftar.filter(p => p.kategori === k).length}</span></span>
-            <small className="redup">{ket}</small>
+          <button key={k} type="button" className={kat === k ? 'on' : ''} onClick={() => setKat(k)}>
+            <span className="baris" style={{ justifyContent: 'space-between', flexWrap: 'nowrap', alignItems: 'flex-start' }}><b>{j}</b><span className="jml">{d.daftar.filter(p => p.kategori === k).length}</span></span>
+            <small>{ket}</small>
           </button>
         ))}
       </div>
       {form && (
-        <form className="panel" onSubmit={simpan}>
-          <h3 className="judul-bagian">{form.id ? 'Ubah panduan' : 'Panduan baru'}</h3>
+        <form className="kartu" style={{ padding: 22, marginTop: 16 }} onSubmit={simpan}>
+          <h3 style={{ margin: '0 0 12px' }}>{form.id ? 'Ubah panduan' : 'Panduan baru'}</h3>
           <div className="dua">
             <label>Bagian<select value={form.kategori} onChange={e => setForm({ ...form, kategori: e.target.value })}>{KATEGORI.map(([k, j]) => <option key={k} value={k}>{j}</option>)}</select></label>
             <label>Label singkat<input value={form.tag ?? ''} onChange={e => setForm({ ...form, tag: e.target.value })} maxLength={40} placeholder="mis. Chat klien" /></label>
@@ -47,19 +49,25 @@ export default function Sop({ studioId }) {
           <label>Judul<input value={form.judul} onChange={e => setForm({ ...form, judul: e.target.value })} required maxLength={160} placeholder="mis. Alur membalas chat klien" /></label>
           <label>Penjelasan singkat<input value={form.ket ?? ''} onChange={e => setForm({ ...form, ket: e.target.value })} maxLength={500} /></label>
           <label>Poin-poin (satu baris = satu poin)<textarea rows={6} value={form.poin ?? ''} onChange={e => setForm({ ...form, poin: e.target.value })} maxLength={8000} placeholder={'Balas chat klien baru paling lambat 15 menit di jam kerja.\nKonfirmasi brief, referensi, deadline, dan aturan revisi sebelum klien bayar.'} /></label>
-          <div className="modal-aksi"><button type="button" className="btn" onClick={() => setForm(null)}>Batal</button><button className="btn utama">Simpan</button></div>
+          <div className="modal-aksi"><button type="button" className="tombol k" onClick={() => setForm(null)}>Batal</button><button className="tombol k p">Simpan</button></div>
         </form>
       )}
-      {tampil.length === 0 ? <div className="kosong">{d.daftar.some(p => p.kategori === kat) ? 'Tidak ada panduan yang cocok.' : `Belum ada panduan di bagian ini.${d.bolehUbah ? ' Klik "+ Tambah panduan".' : ''}`}</div> : tampil.map((p, i) => (
-        <div key={p.id} className="panel">
-          <button type="button" className="sop-judul" onClick={() => setBuka({ ...buka, [p.id]: !buka[p.id] })} aria-expanded={!!buka[p.id]}>
-            <span><b>{i + 1}. {p.judul}</b>{p.tag && <span className="chip sub" style={{ marginLeft: 6 }}>{p.tag}</span>}{p.ket && <div className="redup kecil">{p.ket}</div>}</span><span>{buka[p.id] ? '▾' : '▸'}</span>
+      <h2 style={{ margin: '20px 0 4px', fontSize: 24 }}>{judulKat}</h2>
+      <p style={{ margin: '0 0 14px', color: 'var(--text-secondary)' }}>{d.studio}</p>
+      {tampil.length === 0 ? (
+        <div className="kartu" style={{ padding: 32, textAlign: 'center' }}><b>{d.daftar.some(p => p.kategori === kat) ? 'Tidak ada panduan yang cocok.' : 'Belum ada panduan di bagian ini.'}</b>{d.bolehUbah && !d.daftar.some(p => p.kategori === kat) && <p className="kosong" style={{ margin: '6px 0 0' }}>Klik "+ Tambah Panduan" untuk menulis SOP studio ini.</p>}</div>
+      ) : tampil.map((p, i) => (
+        <div key={p.id} className="kartu sop-item">
+          <button type="button" onClick={() => setBuka({ ...buka, [p.id]: !buka[p.id] })} aria-expanded={!!buka[p.id]}>
+            <span className="no">{i + 1}</span>
+            <span style={{ flex: 1 }}><b>{p.judul}</b>{p.tag && <span className="chip" style={{ marginLeft: 8, fontSize: 12, padding: '1px 10px' }}>{p.tag}</span>}{p.ket && <small className="arti">{p.ket}</small>}</span>
+            <span aria-hidden>{buka[p.id] ? '▾' : '▸'}</span>
           </button>
           {buka[p.id] && (
             <>
-              {p.poin && <ul style={{ margin: '10px 0 0', paddingLeft: 20, lineHeight: 1.6 }}>{p.poin.split('\n').filter(x => x.trim()).map((x, j) => <li key={j}>{x.replace(/^[-•*]\s*/, '')}</li>)}</ul>}
-              <div className="meta" style={{ marginTop: 10 }}><span className="redup kecil">Terakhir diubah {p.olehNama ?? ''} · {new Date(p.updatedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                {d.bolehUbah && <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6 }}><button className="btn kecil" onClick={() => setForm({ ...p })}>Ubah</button><button className="btn kecil" onClick={() => hapus(p)}>Hapus</button></span>}</div>
+              {p.poin && <ul>{p.poin.split('\n').filter(x => x.trim()).map((x, j) => <li key={j}>{x.replace(/^[-•*]\s*/, '')}</li>)}</ul>}
+              <div className="baris" style={{ padding: '0 20px 16px' }}><small className="arti" style={{ margin: 0 }}>Terakhir diubah {p.olehNama ?? ''} · {new Date(p.updatedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</small>
+                {d.bolehUbah && <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6 }}><button type="button" className="tombol k" onClick={() => setForm({ ...p })}>Ubah</button><button type="button" className="tombol k" onClick={() => hapus(p)}>Hapus</button></span>}</div>
             </>
           )}
         </div>

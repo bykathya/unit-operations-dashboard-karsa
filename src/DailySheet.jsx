@@ -79,40 +79,81 @@ function TabInbox({ d, studioId, akunPilih, aksi }) {
   const angkaBlur = (o, k) => (e) => { const v = e.target.value; if (String(v) !== String(o[k] || '')) ubahOrder(o, { [k]: v === '' ? null : Number(v) }) }
   const rpKira = f.realUsd && f.kurs ? Number(f.realUsd) * Number(f.kurs) : null
 
+  const namaAkunPilih = akunPilih ? d.pilihan.akun.find(a => a.id === akunPilih)?.nama : null
+  const target = akunPilih ? d.target?.akun?.[akunPilih] ?? null : d.target?.unitUsd ?? null
+  const tercapai = target > 0 ? Math.round((total / target) * 100) : 0
+  const simpanTarget = (e) => {
+    const v = Number(e.target.value || 0); if (v === Number(target || 0)) return
+    const t = d.target
+    aksi(() => akunPilih
+      ? api('/api/circle/penjualan/target', { method: 'PUT', body: { akunId: akunPilih, tahun: t.tahun, bulan: t.bulan, targetUsd: v } })
+      : api('/api/circle/kaizen/target', { method: 'PUT', body: { studioId, tahun: t.tahun, bulan: t.bulan, targetUsd: v } }))
+  }
+  const totalRail = rail.reduce((s, x) => s + x.v, 0), totalAkun = perAkun.reduce((s, x) => s + x.v, 0)
+  const WARNA_AKUN = ['var(--accent)', 'var(--pink-candy)', 'var(--kd-kuning)', '#111111', '#ffffff']
+  let sudut = 0
+  const donat = totalAkun > 0 ? `conic-gradient(${perAkun.map((x, i) => { const a = sudut; sudut += (x.v / totalAkun) * 360; return `${WARNA_AKUN[i % WARNA_AKUN.length]} ${a}deg ${sudut}deg` }).join(', ')})` : 'var(--track)'
+  const pipa = [['WIP', 'var(--pink-candy)'], ['REVISI', 'var(--kd-kuning)'], ['WAITLIST', 'var(--bg-card)'], ['DONE', 'var(--accent)']]
+  const totalOrder = order.length
+
   return (
     <>
-      <div className="ringkasan">
-        <div className="stat"><span className="redup kecil">Uang masuk (lunas)</span><b>{usd(lunas)}</b><span className="ds-arti">order yang sudah dibayar penuh</span></div>
-        <div className="stat"><span className="redup kecil">Cicilan / DP</span><b>{usd(partial)}</b><span className="ds-arti">uang muka dari order yang belum lunas</span></div>
-        <div className="stat"><span className="redup kecil">Tip / Boost</span><b>{usd(tip)}</b><span className="ds-arti">tambahan dari klien</span></div>
-        <div className="stat ds-sorot"><span className="kecil">Total bulan ini</span><b>{usd(total)}</b><span className="ds-arti">jumlah ketiganya</span></div>
-        <div className="stat"><span className="redup kecil">Antrean</span><b>{order.filter(o => o.progres !== 'DONE').length}</b><span className="ds-arti">{hitungProgres(order, 'WIP')} WIP · {hitungProgres(order, 'REVISI')} revisi · {hitungProgres(order, 'WAITLIST')} waitlist</span></div>
-        <div className="stat"><span className="redup kecil">Done</span><b>{hitungProgres(bulanIni, 'DONE')}</b><span className="ds-arti">order selesai bulan ini</span></div>
-      </div>
-
-      <div className="ds-dua">
-        <div className="panel"><h3 className="judul-bagian">Jalur bayar <span className="ds-arti">uang masuk lewat mana saja</span></h3><Batang data={rail} /></div>
-        <div className="panel"><h3 className="judul-bagian">Porsi tiap akun <span className="ds-arti">akun mana yang paling banyak menghasilkan</span></h3>
-          {perAkun.length ? <Batang data={perAkun} /> : <div className="redup">Belum ada akun jualan. Tambahkan di menu Akun jualan.</div>}</div>
-      </div>
-
-      <div className="panel" style={{ marginBottom: 14 }}>
-        <h3 className="judul-bagian">Order per status <span className="ds-arti">WIP = sedang dikerjakan · Waitlist = antre · Done = selesai</span></h3>
-        <div className="empat" style={{ marginBottom: 12 }}>
-          {d.pilihan.progres.map(p => <div key={p} className="stat"><span className="kecil"><span className={`lencana ${KELAS_PROGRES[p]}`}>{LABEL_PROGRES[p]}</span></span><b>{hitungProgres(order, p)}</b></div>)}
+      <div className="ds-atas">
+        <div className="kartu ds-kotak">
+          <small className="kosong">Order Auto-Counter · hitungan otomatis</small>
+          <h2>{namaAkunPilih ?? 'Semua akun'}{!namaAkunPilih && d.namaStudio ? ` ${d.namaStudio}` : ''}</h2>
+          <div className="ds-enam">
+            <div><span>Realized Earn (Inbox)<small>uang yang sudah dibayar klien</small></span><b>{usd(lunas)}</b><small>{formatRp(lunas * d.pilihan.kursBawaan)}</small></div>
+            <div><span>Boost / Tip<small>tip tambahan dari klien</small></span><b>{usd(tip)}</b><small>{formatRp(tip * d.pilihan.kursBawaan)}</small></div>
+            <div><span>Partial (Order Progress)<small>cicilan / DP yang masuk</small></span><b>{usd(partial)}</b><small>{formatRp(partial * d.pilihan.kursBawaan)}</small></div>
+            <div className="pink"><span>Milestone Total<small>jumlah ketiganya</small></span><b>{usd(total)}</b><small>{formatRp(total * d.pilihan.kursBawaan)}</small></div>
+            <div><span>Queue<small>order yang belum selesai</small></span><b>{order.filter(o => o.progres !== 'DONE').length}</b><small>{hitungProgres(order, 'WIP')} WIP · {hitungProgres(order, 'REVISI')} Rev</small></div>
+            <div className="lime"><span>Done<small>order selesai</small></span><b>{hitungProgres(bulanIni, 'DONE')}</b></div>
+          </div>
+          <div className="ds-target">
+            <div className="baris" style={{ justifyContent: 'space-between' }}><b>Target bulanan</b><b>{tercapai}% tercapai</b></div>
+            <div className="baris">
+              {d.target?.bolehUbah && d.bolehUbah
+                ? <input key={`${akunPilih}-${target}`} type="number" min="0" step="1" defaultValue={target ?? ''} placeholder="0" onBlur={simpanTarget} aria-label="Target bulanan (USD)" />
+                : <b style={{ fontFamily: 'var(--font-judul)' }}>{target ? usd(target) : '—'}</b>}
+              <small className="kosong">$ · {formatRp((target || 0) * d.pilihan.kursBawaan)}</small>
+            </div>
+            <div className="bar"><i style={{ width: `${Math.min(100, tercapai)}%` }} /></div>
+          </div>
         </div>
-        <Tabel kolom={[['Akun'], ['Waitlist', 1], ['WIP', 1], ['Revisi', 1], ['Done', 1], ['Uang masuk', 1]]} jumlah={d.pilihan.akun.length} kosong="Belum ada akun jualan.">
-          {d.pilihan.akun.filter(a => !akunPilih || a.id === akunPilih).map(a => {
+        <div className="ds-kanan">
+          <div className="kartu ds-kotak">
+            <div className="baris" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}><div><h2>Payment Rail Split</h2><small className="kosong">uang masuk lewat mana saja</small></div><b>{usd(totalRail)}</b></div>
+            <div className="ds-rail">{totalRail > 0 ? rail.filter(x => x.v > 0).map((x, i) => <i key={x.k} style={{ width: `${(x.v / totalRail) * 100}%`, background: WARNA_AKUN[rail.indexOf(x) % WARNA_AKUN.length] }} title={x.k} />) : null}</div>
+            <div className="ds-rail-k">{rail.map(x => <div key={x.k}><span>{x.k}</span><b>{usd(x.v)}</b><small>{totalRail ? Math.round((x.v / totalRail) * 100) : 0}%</small></div>)}</div>
+          </div>
+          <div className="kartu ds-kotak">
+            <div className="baris" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}><div><h2>Account Earnings Contribution</h2><small className="kosong">porsi omset tiap akun</small></div><span className="chip">{perAkun.length} Akun</span></div>
+            {perAkun.length ? (
+              <div className="ds-donat-w">
+                <div className="ds-donat" style={{ background: donat }} />
+                <div className="ds-akun-l">{perAkun.map((x, i) => <div key={x.k}><span><i style={{ background: WARNA_AKUN[i % WARNA_AKUN.length] }} />{x.k} <small className="kosong">{x.sub}</small></span><b>{usd(x.v)} <small className="kosong">({totalAkun ? Math.round((x.v / totalAkun) * 100) : 0}%)</small></b></div>)}</div>
+              </div>
+            ) : <p className="kosong">Belum ada akun jualan. Tambahkan di menu Akun jualan.</p>}
+          </div>
+        </div>
+      </div>
+
+      <div className="kartu ds-kotak">
+        <div className="baris" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}><div><h2>Order Pipeline &amp; Status</h2><small className="kosong">WIP = sedang dikerjakan · Waitlist = antre · Done = selesai</small></div><span className="chip">{totalOrder} Total Order</span></div>
+        <div className="ds-pipa">{pipa.map(([p, w]) => { const n = hitungProgres(order, p); return <div key={p} style={{ background: w }}><span>{LABEL_PROGRES[p]}<small>{totalOrder ? Math.round((n / totalOrder) * 100) : 0}% share</small></span><b>{n}</b></div> })}</div>
+        <Tabel kolom={[['Akun'], ['WIP', 1], ['Revisi', 1], ['Waitlist', 1], ['Done', 1], ['Realized Earn', 1]]} jumlah={d.pilihan.akun.length} kosong="Belum ada akun jualan.">
+          {d.pilihan.akun.filter(a => !akunPilih || a.id === akunPilih).map((a, i) => {
             const o = d.order.filter(x => x.akunId === a.id)
-            return <tr key={a.id}><Sel l="Akun"><b>{a.nama}</b> <small className="redup">{a.platform}</small></Sel>{d.pilihan.progres.map(p => <Sel key={p} l={LABEL_PROGRES[p]} kanan>{hitungProgres(o, p)}</Sel>)}<Sel l="Uang masuk" kanan>{usd(o.filter(x => x.bulanIni).reduce((s, x) => s + masukOrder(x), 0))}</Sel></tr>
+            return <tr key={a.id}><Sel l="Akun"><span className="ds-titik" style={{ background: WARNA_AKUN[d.pilihan.akun.indexOf(a) % WARNA_AKUN.length], border: '1.5px solid var(--line)' }} /> {a.nama} <small className="redup">{a.platform}</small></Sel>{['WIP', 'REVISI', 'WAITLIST', 'DONE'].map(p => <Sel key={p} l={LABEL_PROGRES[p]} kanan>{hitungProgres(o, p)}</Sel>)}<Sel l="Realized Earn" kanan>{usd(o.filter(x => x.bulanIni).reduce((s, x) => s + masukOrder(x), 0))}</Sel></tr>
           })}
         </Tabel>
       </div>
 
       {/* INBOX */}
-      <div className="panel" style={{ marginBottom: 14 }}>
-        <div className="toolbar"><h3 className="judul-bagian" style={{ margin: 0 }}>Inbox <span className="ds-arti">chat masuk dari calon klien · W1 = minggu ke-1</span></h3>
-          {d.bolehUbah && form !== 'inbox' && <button className="btn utama" style={{ marginLeft: 'auto' }} onClick={() => buka('inbox')}>+ Tambah inbox</button>}</div>
+      <div className="kartu ds-kotak">
+        <div className="baris" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}><div><h2>Inbox Progress (W1–W4)</h2><small className="kosong">Chat masuk dari calon klien per minggu · W1 = minggu ke-1</small></div>
+          {d.bolehUbah && form !== 'inbox' && <button className="tombol hitam" onClick={() => buka('inbox')}>+ Tambah Inbox</button>}</div>
         {form === 'inbox' && (
           <form className="ds-form" onSubmit={kirim}>
             <div className="dua">
@@ -144,9 +185,9 @@ function TabInbox({ d, studioId, akunPilih, aksi }) {
       </div>
 
       {/* ORDER */}
-      <div className="panel">
-        <div className="toolbar"><h3 className="judul-bagian" style={{ margin: 0 }}>Order <span className="ds-arti">order bulan ini dan order bulan lalu yang belum selesai</span></h3>
-          {d.bolehUbah && form !== 'order' && <button className="btn utama" style={{ marginLeft: 'auto' }} onClick={() => buka('order')}>+ Tambah order</button>}</div>
+      <div className="kartu ds-kotak">
+        <div className="baris" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}><div><h2>Order Progress</h2><small className="kosong">Order bulan ini dan order bulan lalu yang belum selesai</small></div>
+          {d.bolehUbah && form !== 'order' && <button className="tombol hitam" onClick={() => buka('order')}>+ Tambah Order</button>}</div>
         {form === 'order' && (
           <form className="ds-form" onSubmit={kirim}>
             <div className="dua">
@@ -392,16 +433,16 @@ function TabPerforma({ studioId, bulanKunci }) {
   )
 }
 
-const TAB = [['inbox', 'Inbox & Order'], ['lempar', 'Lempar Kerjaan'], ['freelance', 'Database Freelance'], ['performa', 'Performa, Bonus & Lembur']]
+const TAB = [['inbox', 'Inbox & Order Progress'], ['lempar', 'Lempar Kerjaan'], ['freelance', 'Database Freelance'], ['performa', 'Performa, Bonus & Lembur']]
 const ARTI_TAB = { inbox: 'Catat chat masuk dan order, lalu lihat pendapatan per akun.', lempar: 'Kerjaan yang dilempar ke freelancer dan status bayarnya.', freelance: 'Daftar freelancer yang pernah atau bisa diajak kerja.', performa: 'Target dan bonus admin & artist, komisi, serta catatan lembur.' }
 
-export default function DailySheet({ studioId, lingkup, pindah }) {
+export default function DailySheet({ studioId, lingkup, pindah, namaStudio }) {
   const [periode, setPeriode] = useState(bulanSekarang)
   const [tab, setTab] = useState('inbox')
   const [akun, setAkun] = useState(null)
   const [d, setD] = useState(null), [galat, setGalat] = useState('')
   const bulanKunci = kunciBulan(periode)
-  const muat = useCallback(() => api(`${A}?studioId=${studioId}&bulan=${bulanKunci}`).then(x => { setD({ ...x, bulanKunci }); setGalat('') }).catch(e => setGalat(e.message)), [studioId, bulanKunci])
+  const muat = useCallback(() => api(`${A}?studioId=${studioId}&bulan=${bulanKunci}`).then(x => { setD({ ...x, bulanKunci, namaStudio }); setGalat('') }).catch(e => setGalat(e.message)), [studioId, bulanKunci, namaStudio])
   useEffect(() => { muat() }, [muat])
   useSegarkan(muat, ['pemasukan', 'order'])
   const aksi = async (fn, lalu) => { setGalat(''); try { await fn(); lalu?.(); await muat() } catch (e) { setGalat(e.message) } }
@@ -409,20 +450,20 @@ export default function DailySheet({ studioId, lingkup, pindah }) {
 
   if (!d) return <div className="redup">{galat || 'Memuat…'}</div>
   return (
-    <div>
-      <p className="redup" style={{ marginTop: -6 }}>Semua kerja harian studio di satu tempat: chat masuk, order, lempar kerjaan, freelancer, target, bonus, dan lembur. Angka terhitung otomatis dari catatan.</p>
+    <div className="kd">
+      <p className="sub" style={{ marginTop: 0 }}>Semua kerja harian studio di satu tempat: chat masuk, order, lempar kerjaan, freelancer, target, bonus, dan lembur. Angka terhitung otomatis dari catatan.</p>
       {galat && <div className="galat">{galat}</div>}
       <div className="toolbar">
         <button className="btn kecil" onClick={() => setPeriode(p => geserBulan(p, -1))} aria-label="Bulan sebelumnya">‹</button>
         <b>{NAMA_BULAN[periode.bulan - 1]} {periode.tahun}</b>
         <button className="btn kecil" onClick={() => setPeriode(p => geserBulan(p, 1))} aria-label="Bulan berikutnya">›</button>
       </div>
-      <div className="subtab">{TAB.map(([k, l]) => <button key={k} className={tab === k ? 'aktif' : ''} onClick={() => setTab(k)}>{l}</button>)}</div>
-      <p className="ds-arti" style={{ margin: '-6px 0 12px' }}>{ARTI_TAB[tab]}</p>
+      <div className="chips" style={{ marginBottom: 8 }}>{TAB.map(([k, l]) => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}</div>
+      <p className="kosong" style={{ margin: '0 0 12px' }}>{ARTI_TAB[tab]}</p>
       {(tab === 'inbox' || tab === 'lempar') && akunAda.length > 0 && (
-        <div className="chips" style={{ marginBottom: 14 }}>
-          <button className={`pilih ${!akun ? 'aktif' : ''}`} onClick={() => setAkun(null)}>Semua akun ({akunAda.length})</button>
-          {akunAda.map(a => <button key={a.id} className={`pilih ${akun === a.id ? 'aktif' : ''}`} onClick={() => setAkun(a.id)}>{a.nama} · {a.platform}</button>)}
+        <div className="chips akun" style={{ marginBottom: 14 }}>
+          <button className={!akun ? 'on' : ''} onClick={() => setAkun(null)}>Semua Akun ({akunAda.length})</button>
+          {akunAda.map(a => <button key={a.id} className={akun === a.id ? 'on' : ''} onClick={() => setAkun(a.id)}>{a.nama} · {a.platform}</button>)}
         </div>
       )}
       {tab === 'inbox' && <TabInbox key={akun ?? 'semua'} d={d} studioId={studioId} akunPilih={akun} aksi={aksi} />}

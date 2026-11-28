@@ -4,7 +4,6 @@ import { api } from './api'
 // INFO & KALENDER (Karsa, 27 Nov 2026): postingan Info & Dokumen dari web pusat yang ditujukan ke kita (pengumuman, event, kontrak,
 // dokumen & Drive) + kalender bulan ini (acara circle, event dari web pusat, hari libur). Untuk semua anggota.
 const JENIS = { SEMUA: 'Semua', PENGUMUMAN: 'Pengumuman', EVENT: 'Event', KONTRAK: 'Kontrak', DOKUMEN: 'Dokumen & Drive' }
-const KELAS = { PENGUMUMAN: 'bayar-lunas', EVENT: 'revisi', KONTRAK: 'bayar-dp', DOKUMEN: '' }
 const HARI = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min']
 const BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
 const tglPanjang = (t) => new Date(t + 'T00:00:00').toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
@@ -25,52 +24,63 @@ function Kalender() {
     e.preventDefault(); setGalat('')
     try { await api('/api/circle/kalender/acara', { method: 'POST', body: { judul: f.judul, tanggal: f.tanggal, mulai: f.mulai || undefined, lokasi: f.lokasi || undefined, seharian: !f.mulai } }); setForm(false); setF({ judul: '', tanggal: '', mulai: '', lokasi: '' }); muat() } catch (er) { setGalat(er.message) }
   }
+  const warnaAcara = (a) => (a.dariPusat ? 'var(--pink-candy)' : 'var(--accent)')
   return (
-    <div className="ik-kal">
-      <div className="panel">
+    <div className="kal-wrap">
+      <div className="kartu kal">
         {galat && <div className="galat">{galat}</div>}
-        <div className="toolbar"><button className="btn kecil" onClick={() => geser(-1)} aria-label="Bulan sebelumnya">‹</button><b>{BULAN[m - 1]} {y}</b><button className="btn kecil" onClick={() => geser(1)} aria-label="Bulan berikutnya">›</button>
-          {d.bisaKelola && !form && <button className="btn utama kecil" style={{ marginLeft: 'auto' }} onClick={() => { setF({ ...f, tanggal: pilih }); setForm(true) }}>+ Tambah acara</button>}</div>
-        <div className="ik-grid">
-          {HARI.map(h => <div key={h} className="ik-nm">{h}</div>)}
-          {Array.from({ length: kosong }).map((_, i) => <div key={`k${i}`} />)}
+        <div className="kal-head">
+          <button type="button" className="tombol k" onClick={() => geser(-1)} aria-label="Bulan sebelumnya">‹</button>
+          <h2>{BULAN[m - 1]} {y}</h2>
+          <button type="button" className="tombol k" onClick={() => geser(1)} aria-label="Bulan berikutnya">›</button>
+          {d.bisaKelola && !form && <button type="button" className="tombol k hitam" style={{ marginLeft: 'auto' }} onClick={() => { setF({ ...f, tanggal: pilih }); setForm(true) }}>+ Tambah acara</button>}
+        </div>
+        <div className="kal-grid">
+          {HARI.map(h => <div key={h} className="nm">{h}</div>)}
+          {Array.from({ length: kosong }).map((_, i) => <div key={`k${i}`} className="kk kosong-sel" />)}
           {d.hari.map(h => (
-            <button key={h.tanggal} type="button" className={`ik-hari${h.tanggal === pilih ? ' pilih' : ''}${h.tanggal === hariIni() ? ' kini' : ''}${h.jenis === 'LIBUR' ? ' libur' : ''}`} onClick={() => setPilih(h.tanggal)} aria-label={`${Number(h.tanggal.slice(8))} ${BULAN[m - 1]}${h.acara.length ? `, ${h.acara.length} acara` : ''}`}>
-              <span>{Number(h.tanggal.slice(8))}</span>
-              {h.acara.length > 0 && <i>{h.acara.slice(0, 3).map(a => <b key={a.id} className={a.dariPusat ? 'pusat' : ''} />)}</i>}
+            <button key={h.tanggal} type="button" className={`kk${h.tanggal === pilih ? ' pilih' : ''}${h.tanggal === hariIni() ? ' hariini' : ''}${h.jenis === 'LIBUR' ? ' libur' : ''}`} onClick={() => setPilih(h.tanggal)} aria-label={`${Number(h.tanggal.slice(8))} ${BULAN[m - 1]}${h.acara.length ? `, ${h.acara.length} acara` : ''}`}>
+              <span className="tg">{Number(h.tanggal.slice(8))}</span>
+              <span className="titik-ev">{h.jenis === 'LIBUR' && <i style={{ background: '#111' }} />}{h.acara.slice(0, 3).map(a => <i key={a.id} style={{ background: warnaAcara(a) }} />)}</span>
+              {(h.acara[0] || h.label) && <span className="lbl-ev">{h.acara[0]?.judul ?? h.label}</span>}
             </button>
           ))}
         </div>
-        <div className="redup kecil" style={{ marginTop: 8, display: 'flex', gap: 12, flexWrap: 'wrap' }}><span><b className="ik-titik" /> acara circle</span><span><b className="ik-titik pusat" /> event dari web pusat</span><span><span className="ik-kotak libur" /> hari libur</span></div>
+        <div className="legenda-ev"><span><i style={{ background: 'var(--accent)' }} />Acara circle</span><span><i style={{ background: 'var(--pink-candy)' }} />Event dari web pusat</span><span><i style={{ background: '#111' }} />Hari libur</span></div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="kal-sisi">
         {form && (
-          <form className="panel" onSubmit={simpan}>
-            <h3 className="judul-bagian">Acara baru</h3>
+          <form className="kartu" style={{ padding: 18, margin: 0 }} onSubmit={simpan}>
+            <h3 style={{ margin: '0 0 10px' }}>Acara baru</h3>
             <div className="dua">
               <label>Judul<input value={f.judul} onChange={e => setF({ ...f, judul: e.target.value })} required maxLength={160} placeholder="mis. Rapat bulanan circle" /></label>
               <label>Tanggal<input type="date" value={f.tanggal} onChange={e => setF({ ...f, tanggal: e.target.value })} required /></label>
               <label>Jam (opsional)<input type="time" value={f.mulai} onChange={e => setF({ ...f, mulai: e.target.value })} /></label>
               <label>Tempat / tautan (opsional)<input value={f.lokasi} onChange={e => setF({ ...f, lokasi: e.target.value })} maxLength={160} /></label>
             </div>
-            <div className="modal-aksi"><button type="button" className="btn" onClick={() => setForm(false)}>Batal</button><button className="btn utama">Simpan</button></div>
+            <div className="modal-aksi"><button type="button" className="tombol k" onClick={() => setForm(false)}>Batal</button><button className="tombol k p">Simpan</button></div>
           </form>
         )}
-        <div className="panel">
-          <h3 className="judul-bagian">{tglPanjang(pilih)}</h3>
-          {!terpilih || (!terpilih.acara.length && terpilih.jenis !== 'LIBUR') ? <div className="redup">Tidak ada acara.</div> : (
+        <div className="kartu" style={{ padding: 18, margin: 0 }}>
+          <h3 style={{ margin: '0 0 10px' }}>{tglPanjang(pilih)}</h3>
+          {!terpilih || (!terpilih.acara.length && terpilih.jenis !== 'LIBUR') ? <p className="kosong" style={{ margin: 0 }}>Tidak ada acara di tanggal ini.</p> : (
             <>
-              {terpilih.jenis === 'LIBUR' && <div className="meta"><span className="lencana">Libur{terpilih.label ? ` · ${terpilih.label}` : ''}</span></div>}
-              {terpilih.acara.map(a => <div key={a.id} className="ik-ev"><b>{a.judul}</b><div className="redup kecil">{[a.mulai, a.dariPusat ? 'dari web pusat' : 'acara circle', a.berulang ? 'berulang' : null].filter(Boolean).join(' · ')}</div>{a.lokasi && (/^https?:\/\//.test(a.lokasi) ? <a className="kecil" href={a.lokasi} target="_blank" rel="noopener noreferrer">Buka tautan →</a> : <div className="kecil">📍 {a.lokasi}</div>)}</div>)}
+              {terpilih.jenis === 'LIBUR' && <div className="ev"><span className="pita-ev" style={{ background: '#111' }} /><div><small>Hari libur</small><b>{terpilih.label || 'Libur'}</b></div></div>}
+              {terpilih.acara.map(a => (
+                <div key={a.id} className="ev"><span className="pita-ev" style={{ background: warnaAcara(a) }} />
+                  <div><small>{[a.dariPusat ? 'Event dari web pusat' : 'Acara circle', a.mulai, a.berulang ? 'berulang' : null].filter(Boolean).join(' · ')}</small><b>{a.judul}</b>
+                    {a.lokasi && (/^https?:\/\//.test(a.lokasi) ? <small><a href={a.lokasi} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text)', fontWeight: 600 }}>Buka tautan →</a></small> : <small>📍 {a.lokasi}</small>)}</div></div>
+              ))}
             </>
           )}
         </div>
-        <div className="panel">
-          <h3 className="judul-bagian">Bulan ini</h3>
-          {daftar.length === 0 ? <div className="redup">Belum ada acara atau hari libur bulan ini.</div> : daftar.map(h => (
-            <div key={h.tanggal} className="meta" style={{ marginBottom: 4 }}><b>{Number(h.tanggal.slice(8))} {BULAN[m - 1].slice(0, 3)}</b>
-              {h.jenis === 'LIBUR' && <span className="lencana">Libur{h.label ? ` · ${h.label}` : ''}</span>}
-              {h.acara.map(a => <span key={a.id} className="chip sub">{a.judul}{a.mulai ? ` ${a.mulai}` : ''}</span>)}</div>
+        <div className="kartu" style={{ padding: 18, margin: 0 }}>
+          <h3 style={{ margin: '0 0 10px' }}>Semua acara {BULAN[m - 1]}</h3>
+          {daftar.length === 0 ? <p className="kosong" style={{ margin: 0 }}>Belum ada acara bulan ini.</p> : daftar.map(h => (
+            <button key={h.tanggal} type="button" className="baris-ev" onClick={() => setPilih(h.tanggal)}>
+              <b>{Number(h.tanggal.slice(8))}</b><span>{[...(h.jenis === 'LIBUR' ? [h.label || 'Hari libur'] : []), ...h.acara.map(a => a.judul)].join(' · ')}</span>
+              <i style={{ background: h.jenis === 'LIBUR' ? '#111' : warnaAcara(h.acara[0] ?? {}) }} />
+            </button>
           ))}
         </div>
       </div>
@@ -84,23 +94,26 @@ export default function InfoKalender() {
   useEffect(() => { api('/api/circle/info').then(setInfo).catch(e => setGalat(e.message)) }, [])
   const tampil = (info ?? []).filter(a => (jenis === 'SEMUA' || a.jenis === jenis) && (!cari || `${a.judul} ${a.konten} ${a.tautan ?? ''}`.toLowerCase().includes(cari.toLowerCase())))
   return (
-    <div>
-      <p className="redup" style={{ marginTop: -6 }}>Pengumuman, event, kontrak, dan dokumen dari Kepala Circle dan Koordinator, ditambah kalender acara.</p>
-      <div className="subtab"><button className={tab === 'info' ? 'aktif' : ''} onClick={() => setTab('info')}>Info & Dokumen</button><button className={tab === 'kalender' ? 'aktif' : ''} onClick={() => setTab('kalender')}>Kalender</button></div>
+    <div className="kd">
+      <p className="sub" style={{ marginTop: 0 }}>Pengumuman dari Kepala Circle dan koordinator, plus kalender acara: event, deadline, hari libur, dan pengingat.</p>
+      <div className="chips"><button className={tab === 'info' ? 'on' : ''} onClick={() => setTab('info')}>Pengumuman ({info?.length ?? 0})</button><button className={tab === 'kalender' ? 'on' : ''} onClick={() => setTab('kalender')}>Kalender</button></div>
       {tab === 'kalender' ? <Kalender /> : (
         <>
           {galat && <div className="galat">{galat}</div>}
-          <div className="chips" style={{ marginBottom: 12 }}>
-            {Object.entries(JENIS).map(([k, v]) => <button key={k} className={`pilih ${jenis === k ? 'aktif' : ''}`} onClick={() => setJenis(k)}>{v}{k === 'SEMUA' && info ? ` (${info.length})` : ''}</button>)}
-            <input className="cari" placeholder="Cari…" value={cari} onChange={e => setCari(e.target.value)} aria-label="Cari info" style={{ flex: '1 1 180px' }} />
-          </div>
-          {!info ? <div className="redup">{galat ? '' : 'Memuat…'}</div> : tampil.length === 0 ? <div className="kosong">Belum ada info{info.length ? ' yang cocok' : ''}.</div> : tampil.map(a => (
-            <article key={a.id} className="panel">
-              <div className="meta" style={{ flexWrap: 'wrap' }}><span className={`lencana ${KELAS[a.jenis] ?? ''}`}>{JENIS[a.jenis] ?? 'Pengumuman'}</span><span className="redup kecil">{a.pembuat} · {new Date(a.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span></div>
-              <h3 style={{ margin: '6px 0' }}>{a.judul}</h3>
-              {a.tanggalEvent && <div className="kecil" style={{ fontWeight: 600 }}>📅 {tglPanjang(a.tanggalEvent)}{a.jamEvent ? ` · ${a.jamEvent}` : ''}</div>}
-              {a.konten && <p style={{ whiteSpace: 'pre-wrap', margin: '6px 0' }}>{a.konten}</p>}
-              {a.tautan && <a href={a.tautan} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 700 }}>Buka tautan →</a>}
+          {info?.length > 0 && (
+            <div className="kartu tab-info" style={{ padding: 14, marginBottom: 0 }}>
+              {Object.entries(JENIS).map(([k, v]) => <button key={k} type="button" className={jenis === k ? 'on' : ''} onClick={() => setJenis(k)}>{v}{k === 'SEMUA' ? ` (${info.length})` : ''}</button>)}
+              <input placeholder="Cari pengumuman, kontrak, tautan…" value={cari} onChange={e => setCari(e.target.value)} aria-label="Cari info" />
+            </div>
+          )}
+          {!info ? <p className="kosong">{galat ? '' : 'Memuat…'}</p> : tampil.length === 0 ? (
+            <div className="kartu" style={{ marginTop: 12, padding: 32, textAlign: 'center' }}><b>Belum ada pengumuman{info.length ? ' yang cocok' : ''}.</b><p className="kosong" style={{ margin: '6px 0 0' }}>Pengumuman dari Kepala Circle dan koordinator studiomu akan muncul di sini.</p></div>
+          ) : tampil.map(a => (
+            <article key={a.id} className="post">
+              <div className="meta"><span className={`lbl-j j-${a.jenis ?? 'PENGUMUMAN'}`}>{JENIS[a.jenis] ?? 'Pengumuman'}</span><span>{a.pembuat} · {new Date(a.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span></div>
+              <h3>{a.judul}</h3>
+              {a.konten && <p>{a.konten}</p>}
+              {(a.tanggalEvent || a.tautan) && <div className="meta">{a.tanggalEvent && <span>📅 {tglPanjang(a.tanggalEvent)}{a.jamEvent ? ` · ${a.jamEvent}` : ''}</span>}{a.tautan && <a href={a.tautan} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text)', fontWeight: 600 }}>Buka tautan →</a>}</div>}
             </article>
           ))}
         </>
