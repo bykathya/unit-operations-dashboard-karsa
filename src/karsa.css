@@ -384,3 +384,24 @@ main { padding: 26px clamp(16px, 3vw, 44px) 52px; }
 .kd td.kosong, .kd p.kosong { font-size: 14px; }
 .kd .kk.kosong-sel { border: 0; background: transparent; cursor: default; }
 .kd .kk.libur { background: var(--hover-strong); }
+.kd .mf-tulis { width: 100%; max-width: none !important; margin-top: 14px; min-height: 180px; border: 1.5px solid var(--line); border-radius: 18px; padding: 14px; font: inherit; background: var(--bg-card); color: var(--text); resize: vertical; }
+.kd .mf-isi p.kosong { color: var(--text-secondary); }
+
+/* SOP & Profil web kerja */
+.kd .sop-kat button.on { background: var(--accent); color: #111; border-color: var(--line); }
+.kd .pf-dua { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+@media (max-width: 900px) { .kd .pf-dua { grid-template-columns: 1fr; } }
+.kd .pf-form { padding: 22px; margin: 0; }
+.kd .pf-form label { display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; font-weight: 600; }
+.kd .pf-form input, .kd .pf-form select, .kd .pf-form textarea { max-width: none; min-height: 44px; border: 1.5px solid var(--line); border-radius: 14px; padding: 0 12px; font: inherit; font-weight: 500; background: var(--bg-card); color: var(--text); }
+.kd .pf-form textarea { padding: 10px 12px; }
+.kd .pf-form .orang small { display: block; color: var(--text-secondary); font-size: 14px; }
+.kd .pf-foto { border-radius: 50%; border: 2px solid var(--line); background: var(--accent); overflow: hidden; display: inline-flex; flex: none; }
+.kd .pf-kanan { padding: 22px; margin: 0; }
+.kd .pf-kanan h2 { margin: 0; font-size: 19px; }
+.kd .pf-baris { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 15px; }
+.kd .pf-baris span { color: var(--text-secondary); } .kd .pf-baris b { text-align: right; }
+.kd .pf-dok { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.kd .pf-dok > div { display: flex; justify-content: space-between; gap: 8px; border: 1.5px dashed var(--line); border-radius: 14px; padding: 10px 12px; font-size: 14px; }
+.kd .pf-dok > div.ada { border-style: solid; background: var(--accent); color: #111; }
+.kd .pf-foto img { width: 72px !important; height: 72px !important; border: 0 !important; border-radius: 0; }
